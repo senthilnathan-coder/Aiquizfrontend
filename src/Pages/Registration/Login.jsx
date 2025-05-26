@@ -64,15 +64,22 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorOverall('');
+
         if (!validateForm()) return;
 
         setIsSubmitting(true);
         try {
             const result = await login(formData.email.trim(), formData.password);
+            console.log(result, "login result");
 
             if (result.success) {
+                if (result.user_id) {
+                    localStorage.setItem('userId', result.user_id);
+                }
                 toast.success('Logged in successfully!');
-                navigate('/ai-questions'); // Redirect after login
+                console.log(result, "login result1");
+
+                navigate('/ai-questions');
             } else {
                 setErrorOverall(result.error || 'Login failed');
             }
@@ -82,6 +89,7 @@ const Login = () => {
             setIsSubmitting(false);
         }
     };
+
 
     // Google OAuth login handler
     const googleLogin = useGoogleLogin({

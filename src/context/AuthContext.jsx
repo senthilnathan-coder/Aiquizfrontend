@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(false);
 
+
     // Load user and token from localStorage on mount
     useEffect(() => {
         const storedAuth = localStorage.getItem('auth');
@@ -21,22 +22,22 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         setLoading(true);
         try {
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+
             const response = await fetch('http://localhost:8000/user/signin/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: formData,
             });
 
             const data = await response.json();
+            console.log(data, "login response");
 
             if (!response.ok) throw new Error(data.error || 'Login failed');
 
-            const authData = { user: data.user, token: data.token };
-            localStorage.setItem('auth', JSON.stringify(authData));
-            setUser(data.user);
-            setToken(data.token);
-
-            return { success: true, user: data.user };
+            // Assuming backend returns { message, user_id, token } or similar
+            return { success: true, user_id: data.user_id };
         } catch (error) {
             console.error('Login error:', error.message);
             return { success: false, error: error.message };
@@ -44,6 +45,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         }
     };
+
 
     // Signup function
     const signup = async (formData) => {
@@ -56,14 +58,12 @@ export const AuthProvider = ({ children }) => {
 
             const data = await response.json();
 
+            console.log(data, "signup response");
+
             if (!response.ok) throw new Error(data.error || 'Signup failed');
 
-            const authData = { user: data.user, token: data.token };
-            localStorage.setItem('auth', JSON.stringify(authData));
-            setUser(data.user);
-            setToken(data.token);
-
-            return { success: true, user: data.user };
+            // Backend sends { message, user_id }
+            return { success: true, user_id: data.user_id };
         } catch (error) {
             console.error('Signup error:', error.message);
             return { success: false, error: error.message };
@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         }
     };
+
 
     // Fetch user dashboard/profile data
     const fetchUserProfile = async () => {

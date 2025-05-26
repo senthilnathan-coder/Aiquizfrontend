@@ -50,7 +50,7 @@ const Aiquestions = () => {
 
   const [quizId, setQuizId] = useState(null);
 
-
+  const userId = localStorage.getItem('userId');
 
   // Add FileUploadCard component
   const FileUploadCard = ({ type, icon: Icon, accept, selected, setSelected }) => (
@@ -169,6 +169,7 @@ const Aiquestions = () => {
       formDataToSend.append('url', formData.url.trim());
     }
 
+
     // Add Wikipedia title if provided
     if (formData.wikipediaTitle?.trim()) {
       formDataToSend.append('wikipedia_title', formData.wikipediaTitle.trim());
@@ -215,7 +216,7 @@ const Aiquestions = () => {
     toast.info('Generating questions... This may take a few seconds.');
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/generate_quiz/', {
+      const response = await fetch(`http://localhost:8000/quiz/${userId}/`, {
         method: 'POST',
         body: formDataToSend,
       });
@@ -275,68 +276,69 @@ const Aiquestions = () => {
     }
   };
 
-  // Get from your auth context or localStorage
-  const user = JSON.parse(localStorage.getItem('auth'))?.user;
-  const token = JSON.parse(localStorage.getItem('auth'))?.token;
-  // const { user } = useAuth();
-  console.log('Current user:', user);
+ // Get user and token from localStorage or your auth context
+const auth = JSON.parse(localStorage.getItem('auth'));
+const user = auth?.user;
+const token = auth?.token;
 
-  const handleSaveQuiz = async () => {
-    if (!user || !user._id) {
-      alert('User not logged in');
-      return;
-    }
+console.log('Current user:', user);
 
-    try {
-      setIsSaving(true);
-      const token = JSON.parse(localStorage.getItem('auth'))?.token;
+const handleSaveQuiz = async () => {
+  if (!user || !user._id) {
+    alert('User not logged in');
+    return;
+  }
 
-      // if (!token) {
-      //   alert('Auth token missing');
-      //   setIsSaving(false);
-      //   return;
-      // }
+  if (!token) {
+    alert('Auth token missing');
+    return;
+  }
 
-      const quizData = {
-        user_id: user._id,
-        questions,
-        selectedAnswers,
+  try {
+    setIsSaving(true);
+
+    const quizData = {
+      user_id: user._id,
+      questions,
+      selectedAnswers,
+      score,
+      date: new Date().toISOString(),
+      notes: saveNotes,
+    };
+
+    // Use POST to save data
+    const response = await fetch(`http://localhost:8000/userdashboard/${user._id}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(quizData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || 'Failed to save quiz');
+
+    toast.success('Quiz saved!');
+    setShowSaveModal(false);
+    setSaveNotes('');
+    setSavedQuizzes(prev => [
+      ...prev,
+      {
+        id: data.quiz_id || Date.now(), // fallback id
         score,
         date: new Date().toISOString(),
         notes: saveNotes,
-      };
+      },
+    ]);
+  } catch (err) {
+    toast.error('Error saving quiz: ' + err.message);
+  } finally {
+    setIsSaving(false);
+  }
+};
 
-      const response = await fetch(`http://127.0.0.1:8000/userdashboard/${quizData.user_id}/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(quizData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.error || 'Failed to save quiz');
-
-      toast.success('Quiz saved!');
-      setShowSaveModal(false);
-      setSaveNotes('');
-      setSavedQuizzes((prev) => [
-        ...prev,
-        {
-          id: data.quiz_id,
-          score,
-          date: new Date().toISOString(),
-          notes: saveNotes,
-        },
-      ]);
-    } catch (err) {
-      toast.error('Error saving quiz: ' + err.message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
 
 

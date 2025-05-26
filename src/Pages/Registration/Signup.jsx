@@ -128,9 +128,12 @@ const Signup = () => {
 
       const result = await signup(formDataToSend);
 
+      console.log(result, "dfswf");
+
+
       if (result.success) {
-        if (result.user) {
-          localStorage.setItem('user', JSON.stringify(result.user));
+        if (result.user._id) {
+          // localStorage.setItem('user', JSON.stringify(result.user));
           localStorage.setItem('userId', result.user._id);
         }
         toast.success('Account created successfully!');

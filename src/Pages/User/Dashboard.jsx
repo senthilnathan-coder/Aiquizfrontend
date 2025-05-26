@@ -9,6 +9,7 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   useEffect(() => {
     if (authLoading) return;
 
@@ -35,7 +36,7 @@ const UserDashboard = () => {
 
         console.log("UserID", contextUserId);
 
-        const response = await axios.get(`http://127.0.0.1:8000/userdashboard/${userId}/`, {
+        const response = await axios.get(`http://localhost:8000/userdashboard/${userId}/`, {
           headers: {
             // Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
