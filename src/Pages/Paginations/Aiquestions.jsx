@@ -276,68 +276,68 @@ const Aiquestions = () => {
     }
   };
 
- // Get user and token from localStorage or your auth context
-const auth = JSON.parse(localStorage.getItem('auth'));
-const user = auth?.user;
-const token = auth?.token;
+  // Get user and token from localStorage or your auth context
+  const auth = JSON.parse(localStorage.getItem('auth'));
+  const user = auth?.user;
+  const token = auth?.token;
 
-console.log('Current user:', user);
+  console.log('Current user:', user);
 
-const handleSaveQuiz = async () => {
-  if (!user || !user._id) {
-    alert('User not logged in');
-    return;
-  }
+  const handleSaveQuiz = async () => {
+    if (!user || !user._id) {
+      alert('User not logged in');
+      return;
+    }
 
-  if (!token) {
-    alert('Auth token missing');
-    return;
-  }
+    if (!token) {
+      alert('Auth token missing');
+      return;
+    }
 
-  try {
-    setIsSaving(true);
+    try {
+      setIsSaving(true);
 
-    const quizData = {
-      user_id: user._id,
-      questions,
-      selectedAnswers,
-      score,
-      date: new Date().toISOString(),
-      notes: saveNotes,
-    };
-
-    // Use POST to save data
-    const response = await fetch(`http://localhost:8000/userdashboard/${user._id}/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(quizData),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) throw new Error(data.error || 'Failed to save quiz');
-
-    toast.success('Quiz saved!');
-    setShowSaveModal(false);
-    setSaveNotes('');
-    setSavedQuizzes(prev => [
-      ...prev,
-      {
-        id: data.quiz_id || Date.now(), // fallback id
+      const quizData = {
+        user_id: user._id,
+        questions,
+        selectedAnswers,
         score,
         date: new Date().toISOString(),
         notes: saveNotes,
-      },
-    ]);
-  } catch (err) {
-    toast.error('Error saving quiz: ' + err.message);
-  } finally {
-    setIsSaving(false);
-  }
-};
+      };
+
+      // Use POST to save data
+      const response = await fetch(`http://localhost:8000/userdashboard/${user._id}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(quizData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || 'Failed to save quiz');
+
+      toast.success('Quiz saved!');
+      setShowSaveModal(false);
+      setSaveNotes('');
+      setSavedQuizzes(prev => [
+        ...prev,
+        {
+          id: data.quiz_id || Date.now(), // fallback id
+          score,
+          date: new Date().toISOString(),
+          notes: saveNotes,
+        },
+      ]);
+    } catch (err) {
+      toast.error('Error saving quiz: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
 
 

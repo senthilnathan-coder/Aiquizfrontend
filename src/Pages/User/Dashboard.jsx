@@ -1,25 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
-import { FaUser, FaQuestionCircle, FaChartLine, FaClock, FaTrophy, FaCalendar } from 'react-icons/fa';
+import {
+  FaUser,
+  FaQuestionCircle,
+  FaChartLine,
+  FaClock,
+  FaTrophy,
+  FaCalendar,
+} from "react-icons/fa";
 
 const UserDashboard = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, token } = useAuth(); // Assuming you get token here too
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
+    // Wait until auth finishes loading
     if (authLoading) return;
 
     const fetchDashboard = async () => {
-      try {
-        const contextUserId = user?.id || user?._id;
-        const localUser = JSON.parse(localStorage.getItem("user"));
-        const localUserId = localUser?.id || localUser?._id;
+      if (!user) {
+        setError("User not logged in");
+        setLoading(false);
+        return;
+      }
 
-        const userId = contextUserId || localUserId;
+      try {
+        // Use _id or id from user object safely
+        const userId = user._id || user.id;
 
         if (!userId) {
           setError("User ID not found");
@@ -27,21 +37,21 @@ const UserDashboard = () => {
           return;
         }
 
-        // const token = localStorage.getItem("token");
         // if (!token) {
         //   setError("Authentication token missing");
         //   setLoading(false);
         //   return;
         // }
 
-        console.log("UserID", contextUserId);
-
-        const response = await axios.get(`http://localhost:8000/userdashboard/${userId}/`, {
-          headers: {
-            // Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        const response = await axios.get(
+          `http://localhost:8000/userdashboard/${userId}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         setDashboardData(response.data);
         setError(null);
@@ -54,7 +64,7 @@ const UserDashboard = () => {
     };
 
     fetchDashboard();
-  }, [user, authLoading]);
+  }, [user, authLoading, token]);
 
   if (authLoading || loading) {
     return (
@@ -67,7 +77,7 @@ const UserDashboard = () => {
     );
   }
 
-  if (!user && !JSON.parse(localStorage.getItem("user"))) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center p-10">
@@ -83,7 +93,7 @@ const UserDashboard = () => {
         <div className="text-center p-10">
           <p className="text-red-500 mb-4">{error}</p>
           <button
-            // onClick={() => window.location.reload()}
+            onClick={() => window.location.reload()}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
           >
             Retry
@@ -110,7 +120,10 @@ const UserDashboard = () => {
       <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
       <div className="space-y-4">
         {activities?.map((activity, index) => (
-          <div key={index} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg">
+          <div
+            key={index}
+            className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg"
+          >
             <FaCalendar className="text-blue-500" />
             <div>
               <p className="font-medium">{activity.action}</p>
@@ -131,16 +144,23 @@ const UserDashboard = () => {
           src={
             userData.user_profile?.profile_image
               ? `http://localhost:8000${userData.user_profile.profile_image}`
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.user_profile?.full_name)}`
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                userData.user_profile?.full_name || "User"
+              )}`
           }
           alt="Profile"
           className="w-20 h-20 rounded-full object-cover"
         />
         <div>
-          <h2 className="text-xl font-semibold">{userData.user_profile?.full_name}</h2>
+          <h2 className="text-xl font-semibold">
+            {userData.user_profile?.full_name || "User"}
+          </h2>
           <p className="text-gray-500">{userData.user_profile?.email}</p>
           <p className="text-sm text-gray-400">
-            Member since {new Date(userData.user_profile?.joined_date).toLocaleDateString()}
+            Member since{" "}
+            {userData.user_profile?.joined_date
+              ? new Date(userData.user_profile.joined_date).toLocaleDateString()
+              : "N/A"}
           </p>
         </div>
       </div>
@@ -158,32 +178,35 @@ const UserDashboard = () => {
           <StatCard
             icon={FaQuestionCircle}
             title="Total Questions Attempted"
-            value={dashboardData.quiz_stats?.total_attempts || 0}
+            value={dashboardData?.quiz_stats?.total_attempts || 0}
             color="border-blue-500"
           />
           <StatCard
             icon={FaTrophy}
             title="Best Score"
-            value={`${dashboardData.quiz_stats?.best_score || 0}%`}
+            value={`${dashboardData?.quiz_stats?.best_score || 0}%`}
             color="border-green-500"
           />
           <StatCard
             icon={FaClock}
             title="Average Score"
-            value={`${Math.round(dashboardData.quiz_stats?.average_score || 0)}%`}
+            value={`${Math.round(dashboardData?.quiz_stats?.average_score || 0)}%`}
             color="border-purple-500"
           />
 
           <UserProfile userData={dashboardData} />
 
-          <QuizStats stats={{
-            total_quizzes: dashboardData.quiz_stats?.total_attempts || 0,
-            average_score: dashboardData.quiz_stats?.average_score || 0,
-            mcq_attempts: dashboardData.activity_summary?.mcq_attempts || 0,
-            true_false_attempts: dashboardData.activity_summary?.true_false_attempts || 0
-          }} />
+          <QuizStats
+            stats={{
+              total_quizzes: dashboardData?.quiz_stats?.total_attempts || 0,
+              average_score: dashboardData?.quiz_stats?.average_score || 0,
+              mcq_attempts: dashboardData?.activity_summary?.mcq_attempts || 0,
+              true_false_attempts:
+                dashboardData?.activity_summary?.true_false_attempts || 0,
+            }}
+          />
 
-          <RecentActivity activities={dashboardData.recent_activities || []} />
+          <RecentActivity activities={dashboardData?.recent_activities || []} />
 
           <div className="bg-white p-6 rounded-xl shadow-md col-span-full">
             <h2 className="text-xl font-semibold mb-4">Performance Overview</h2>
@@ -191,13 +214,13 @@ const UserDashboard = () => {
               <div className="p-4 bg-yellow-50 rounded-lg">
                 <p className="text-sm text-yellow-600">MCQ Attempts</p>
                 <p className="text-2xl font-bold text-yellow-700">
-                  {dashboardData.activity_summary?.mcq_attempts || 0}
+                  {dashboardData?.activity_summary?.mcq_attempts || 0}
                 </p>
               </div>
               <div className="p-4 bg-indigo-50 rounded-lg">
                 <p className="text-sm text-indigo-600">True/False Attempts</p>
                 <p className="text-2xl font-bold text-indigo-700">
-                  {dashboardData.activity_summary?.true_false_attempts || 0}
+                  {dashboardData?.activity_summary?.true_false_attempts || 0}
                 </p>
               </div>
             </div>
@@ -218,7 +241,9 @@ const QuizStats = ({ stats }) => (
       </div>
       <div className="p-4 bg-green-50 rounded-lg">
         <p className="text-sm text-green-600">Average Score</p>
-        <p className="text-2xl font-bold text-green-700">{Math.round(stats.average_score)}%</p>
+        <p className="text-2xl font-bold text-green-700">
+          {Math.round(stats.average_score)}%
+        </p>
       </div>
       <div className="p-4 bg-yellow-50 rounded-lg">
         <p className="text-sm text-yellow-600">MCQ Attempts</p>
@@ -226,7 +251,9 @@ const QuizStats = ({ stats }) => (
       </div>
       <div className="p-4 bg-purple-50 rounded-lg">
         <p className="text-sm text-purple-600">True/False Attempts</p>
-        <p className="text-2xl font-bold text-purple-700">{stats.true_false_attempts}</p>
+        <p className="text-2xl font-bold text-purple-700">
+          {stats.true_false_attempts}
+        </p>
       </div>
     </div>
   </div>

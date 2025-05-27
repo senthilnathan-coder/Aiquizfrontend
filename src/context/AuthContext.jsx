@@ -7,8 +7,6 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(false);
 
-
-    // Load user and token from localStorage on mount
     useEffect(() => {
         const storedAuth = localStorage.getItem('auth');
         if (storedAuth) {
@@ -18,7 +16,6 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
-    // Login function
     const login = async (email, password) => {
         setLoading(true);
         try {
@@ -36,8 +33,21 @@ export const AuthProvider = ({ children }) => {
 
             if (!response.ok) throw new Error(data.error || 'Login failed');
 
-            // Assuming backend returns { message, user_id, token } or similar
-            return { success: true, user_id: data.user_id };
+            const userData = {
+                _id: data.user_id,
+                email,
+            };
+
+            const authData = {
+                user: userData,
+                token: data.token,
+            };
+
+            setUser(userData);
+            setToken(data.token);
+            localStorage.setItem('auth', JSON.stringify(authData));
+
+            return { success: true };
         } catch (error) {
             console.error('Login error:', error.message);
             return { success: false, error: error.message };
@@ -46,8 +56,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-
-    // Signup function
     const signup = async (formData) => {
         setLoading(true);
         try {
@@ -57,13 +65,26 @@ export const AuthProvider = ({ children }) => {
             });
 
             const data = await response.json();
-
             console.log(data, "signup response");
 
             if (!response.ok) throw new Error(data.error || 'Signup failed');
 
-            // Backend sends { message, user_id }
-            return { success: true, user_id: data.user_id };
+            const userData = {
+                _id: data.user_id,
+                email: formData.get("email"),
+                fullName: formData.get("full_name"),
+            };
+
+            const authData = {
+                user: userData,
+                token: data.token,
+            };
+
+            setUser(userData);
+            setToken(data.token);
+            localStorage.setItem('auth', JSON.stringify(authData));
+
+            return { success: true };
         } catch (error) {
             console.error('Signup error:', error.message);
             return { success: false, error: error.message };
@@ -72,8 +93,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-
-    // Fetch user dashboard/profile data
     const fetchUserProfile = async () => {
         if (!user?._id) return null;
         try {
@@ -86,12 +105,9 @@ export const AuthProvider = ({ children }) => {
             if (!response.ok) throw new Error('Failed to fetch profile');
 
             const data = await response.json();
-
             const updatedUser = { ...user, ...data.user };
             setUser(updatedUser);
-
             localStorage.setItem('auth', JSON.stringify({ user: updatedUser, token }));
-
             return updatedUser;
         } catch (error) {
             console.error('Profile fetch error:', error.message);
@@ -99,7 +115,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Logout
     const logout = () => {
         localStorage.removeItem('auth');
         setUser(null);
@@ -124,7 +139,6 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// Hook to use Auth context
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
