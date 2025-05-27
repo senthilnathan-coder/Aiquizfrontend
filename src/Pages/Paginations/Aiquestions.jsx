@@ -10,6 +10,7 @@ import SaveQuizModal from '../../components/quiz/SaveQuizModal';
 import SavedQuizzesList from '../../components/Quiz/SavedQuizzesList';
 import { useAuth } from '../../context/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
 
 
@@ -254,14 +255,16 @@ const Aiquestions = () => {
   };
 
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setTimerActive(false); // Stop the timer
+
     let correctCount = 0;
     questions.forEach((question, index) => {
       if (selectedAnswers[index] === question.answer) {
         correctCount++;
       }
     });
+
     const finalScore = (correctCount / questions.length) * 100;
     setScore(finalScore);
     setShowResults(true);
@@ -274,25 +277,21 @@ const Aiquestions = () => {
     } else {
       toast.warning(`Keep practicing! Score: ${finalScore.toFixed(1)}%`);
     }
-  };
 
-  // Get user and token from localStorage or your auth context
-  const auth = JSON.parse(localStorage.getItem('auth'));
-  const user = auth?.user;
-  const token = auth?.token;
+    // Get user and token from localStorage
+    const auth = JSON.parse(localStorage.getItem('auth'));
+    const user = auth?.user;
+    const token = auth?.token;
 
-  console.log('Current user:', user);
+    // if (!user || !user._id) {
+    //   alert('User not logged in');
+    //   return;
+    // }
 
-  const handleSaveQuiz = async () => {
-    if (!user || !user._id) {
-      alert('User not logged in');
-      return;
-    }
-
-    if (!token) {
-      alert('Auth token missing');
-      return;
-    }
+    // if (!token) {
+    //   alert('Auth token missing');
+    //   return;
+    // }
 
     try {
       setIsSaving(true);
@@ -301,22 +300,40 @@ const Aiquestions = () => {
         user_id: user._id,
         questions,
         selectedAnswers,
-        score,
+        score: finalScore,
         date: new Date().toISOString(),
         notes: saveNotes,
       };
 
-      // Use POST to save data
-      const response = await fetch(`http://localhost:8000/userdashboard/${user._id}/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(quizData),
-      });
+      console.log('Saving quiz:', quizData);
+
+      // const response = await fetch(`http://localhost:8000/quiz/${user._id}/`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify(quizData),
+      // });
+
+      const response = await axios.post(
+        `http://localhost:8000/quiz/${user._id}/`,
+        quizData,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+
+
+      console.log(response.data);
+
 
       const data = await response.json();
+      console.log(data);
+
 
       if (!response.ok) throw new Error(data.error || 'Failed to save quiz');
 
@@ -326,8 +343,8 @@ const Aiquestions = () => {
       setSavedQuizzes(prev => [
         ...prev,
         {
-          id: data.quiz_id || Date.now(), // fallback id
-          score,
+          id: data.quiz_id || Date.now(),
+          score: finalScore,
           date: new Date().toISOString(),
           notes: saveNotes,
         },
@@ -338,6 +355,7 @@ const Aiquestions = () => {
       setIsSaving(false);
     }
   };
+
 
 
 

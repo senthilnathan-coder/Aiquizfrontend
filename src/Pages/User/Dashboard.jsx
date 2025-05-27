@@ -37,11 +37,6 @@ const UserDashboard = () => {
           return;
         }
 
-        // if (!token) {
-        //   setError("Authentication token missing");
-        //   setLoading(false);
-        //   return;
-        // }
 
         const response = await axios.get(
           `http://localhost:8000/userdashboard/${userId}/`,
@@ -52,6 +47,10 @@ const UserDashboard = () => {
             },
           }
         );
+
+
+        console.log(response.data);
+
 
         setDashboardData(response.data);
         setError(null);
@@ -167,11 +166,14 @@ const UserDashboard = () => {
     </div>
   );
 
+  console.log(dashboardData.full_name);
+
+
   return (
-    <div className="p-6 md:p-10 bg-gray-50 min-h-screen">
+    <div className="p-6 md:p-10 bg-gray-50 min-h-screen mt-20">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Welcome, {dashboardData?.user_profile?.full_name || "User"}
+          Welcome, {dashboardData.full_name}
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
