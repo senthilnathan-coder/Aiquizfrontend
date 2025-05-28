@@ -15,6 +15,7 @@ import SuperDashboard from './Pages/SuperAdmin/SuperDashboard';
 import PricingPlans from './Pages/Pricing/PricingPlans';
 import CustomPackageBuilder from './components/CustomPackageBuilder';
 import Aiquestions from './Pages/Paginations/Aiquestions';
+// import Join from './Pages/Admin/join';
 
 const App = () => {
   return (
@@ -81,6 +82,8 @@ const App = () => {
 
             {/* Catch all route */}
             <Route path="*" element={<Navigate to="/home" replace />} />
+
+            {/* <Route path='/Join' element={<Join />}/> */}
           </Routes>
         </BrowserRouter>
       </SubscriptionProvider>
