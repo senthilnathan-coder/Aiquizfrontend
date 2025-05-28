@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { FaRobot, FaSpinner, FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaLink, FaWikipediaW } from 'react-icons/fa';
 import { MdSettings, MdCloudUpload } from 'react-icons/md';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Make sure this import is active
+// import 'react-toastify/dist/ReactToastify.css';
 
 
-import { FaRegBookmark } from 'react-icons/fa';
-import SaveQuizModal from '../../components/quiz/SaveQuizModal';
-import SavedQuizzesList from '../../components/Quiz/SavedQuizzesList';
 import { useAuth } from '../../context/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
@@ -21,12 +18,10 @@ const Aiquestions = () => {
     topic: '',
     count: 10,  // Changed from 5 to 10
     difficulty: 'medium',
-    questionType: 'mcq',  // Add questionType to initial state
-    url: '', // Initialize url
-    wikipediaTitle: '' // Initialize wikipediaTitle
+    questionType: 'mcq'  // Add questionType to initial state
   });
 
-  const { user } = useAuth();
+
   // Add these new state variables
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedAudio, setSelectedAudio] = useState(null);
@@ -54,6 +49,8 @@ const Aiquestions = () => {
   const [quizId, setQuizId] = useState(null);
 
   const userId = localStorage.getItem('userId');
+  console.log(userId, "id");
+
 
   // Add FileUploadCard component
   const FileUploadCard = ({ type, icon: Icon, accept, selected, setSelected }) => (
@@ -67,7 +64,7 @@ const Aiquestions = () => {
       />
       <label
         htmlFor={`${type}-upload`}
-        className="block p-4 bg-white/5 border border-purple-500/30 rounded-xl
+        className="block p-4 bg-white/5 border border-purple-500/30 rounded-xl 
           text-purple-200 cursor-pointer hover:bg-white/10 transition-all"
       >
         <div className="flex flex-col items-center gap-2">
@@ -132,28 +129,19 @@ const Aiquestions = () => {
       setterFunction(file);
       toast.success(`${type} file selected successfully`);
     } else {
-      setterFunction(null); // Clear the selected file if invalid
       toast.error(`Invalid ${type} file`);
     }
   };
 
   // Update handleGenerate to include new file types
+  const { user } = useAuth();
+  console.log("User ID:", user?._id); // should be like: 6655a23cc3bc6e1a0c4ddf14
+
   const handleGenerate = async () => {
-    if (!user?._id) {
-      toast.error("Please log in to generate a quiz");
-      return;
-    }
-
-    // Get token from localStorage
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const token = auth?.token;
-
-    if (!token) {
-      toast.error("Authentication token missing. Please log in again.");
-      return;
-    }
-
-    // Validate content
+    // Generate a unique quiz ID locally
+    const newQuizId = uuidv4();
+    setQuizId(newQuizId);
+    // Improved validation check
     const hasContent = Boolean(
       formData.topic.trim() ||
       selectedImage ||
@@ -174,55 +162,81 @@ const Aiquestions = () => {
 
     const formDataToSend = new FormData();
 
-    // Add basic quiz parameters
-    formDataToSend.append('topic', formData.topic.trim());
+    // Add text content if provided
+    if (formData.topic.trim()) {
+      formDataToSend.append('content', formData.topic.trim());
+    }
+
+    // Add URL if provided
+    if (formData.url?.trim()) {
+      formDataToSend.append('url', formData.url.trim());
+    }
+
+
+    // Add Wikipedia title if provided
+    if (formData.wikipediaTitle?.trim()) {
+      formDataToSend.append('wikipedia_title', formData.wikipediaTitle.trim());
+    }
+
+    // Add files with proper field names
+    if (selectedImage) formDataToSend.append('image', selectedImage);
+    if (selectedAudio) formDataToSend.append('audio', selectedAudio);
+    if (selectedVideo) formDataToSend.append('video', selectedVideo);
+    if (selectedPdf) formDataToSend.append('pdf', selectedPdf);
+    if (selectedWord) formDataToSend.append('word', selectedWord);
+    if (selectedExcel) formDataToSend.append('excel', selectedExcel);
+    if (selectedPpt) formDataToSend.append('ppt', selectedPpt);
+
+    // Add all file types with proper field names
+    if (selectedImage) {
+      formDataToSend.append('image_file', selectedImage);
+    }
+    if (selectedAudio) {
+      formDataToSend.append('audio_file', selectedAudio);
+    }
+    if (selectedVideo) {
+      formDataToSend.append('video_file', selectedVideo);
+    }
+    if (selectedPdf) {
+      formDataToSend.append('pdf_file', selectedPdf);
+    }
+    if (selectedWord) {
+      formDataToSend.append('word_file', selectedWord);
+    }
+    if (selectedExcel) {
+      formDataToSend.append('excel_file', selectedExcel);
+    }
+    if (selectedPpt) {
+      formDataToSend.append('ppt_file', selectedPpt);
+    }
+
+    // Add quiz settings
     formDataToSend.append('difficulty', formData.difficulty);
     formDataToSend.append('question_type', formData.questionType);
     formDataToSend.append('count', formData.count.toString());
-    formDataToSend.append('user_id', user._id); // Include user_id in form data
-
-    // Add files if present
-    if (selectedImage) formDataToSend.append('image_file', selectedImage);
-    if (selectedAudio) formDataToSend.append('audio_file', selectedAudio);
-    if (selectedVideo) formDataToSend.append('video_file', selectedVideo);
-    if (selectedPdf) formDataToSend.append('pdf_file', selectedPdf);
-    if (selectedWord) formDataToSend.append('word_file', selectedWord);
-    if (selectedExcel) formDataToSend.append('excel_file', selectedExcel);
-    if (selectedPpt) formDataToSend.append('ppt_file', selectedPpt);
-
-    // Add URL and Wikipedia title if present
-    if (formData.url?.trim()) formDataToSend.append('url', formData.url.trim());
-    if (formData.wikipediaTitle?.trim()) formDataToSend.append('wikipedia_title', formData.wikipediaTitle.trim());
 
     setIsGenerating(true);
     toast.info('Generating questions... This may take a few seconds.');
 
     try {
-      // Log request details for debugging
-      console.log('Sending request to:', `http://127.0.0.1:8000/quiz/${user._id}/`);
-      console.log('User ID:', user._id);
-
-      const response = await fetch(`http://127.0.0.1:8000/quiz/${user._id}/`, {
+      const response = await fetch(`http://localhost:8000/quiz/${user._id}/`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}` // Add auth token
-        },
-        body: formDataToSend
+        body: formDataToSend,
       });
 
-      // Log response status and text for debugging
-      console.log('Response status:', response.status);
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
+      console.log(response, "iuh");
+
 
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status} - ${responseText}`);
+        const errorText = await response.text();
+        console.error('Server error response:', errorText);
+        throw new Error(`Server error: ${response.status}`);
       }
 
-      const data = JSON.parse(responseText);
+      const data = await response.json();
 
       if (!data || !Array.isArray(data.questions)) {
-        throw new Error('Invalid response format from server');
+        throw new Error('Invalid response from server');
       }
 
       if (data.questions.length === 0) {
@@ -231,7 +245,7 @@ const Aiquestions = () => {
 
       setQuestions(data.questions);
       setShowQuestions(true);
-      setSelectedAnswers({}); // Corrected to empty object
+      setSelectedAnswers({});
       setShowResults(false);
       setTimeLeft(60);
       setTimerActive(true);
@@ -239,7 +253,7 @@ const Aiquestions = () => {
 
     } catch (error) {
       console.error('Generation error details:', error);
-      toast.error(error.message || 'Failed to generate questions');
+      toast.error(error.message || 'Failed to generate questions. Please check your server connection.');
     } finally {
       setIsGenerating(false);
     }
@@ -274,15 +288,15 @@ const Aiquestions = () => {
     const user = auth?.user;
     const token = auth?.token;
 
-    if (!user || !user._id) {
-      toast.error('User not logged in. Cannot save quiz.');
-      return;
-    }
+    // if (!user || !user._id) {
+    //   alert('User not logged in');
+    //   return;
+    // }
 
-    if (!token) {
-      toast.error('Authentication token missing. Please log in again.');
-      return;
-    }
+    // if (!token) {
+    //   alert('Auth token missing');
+    //   return;
+    // }
 
     try {
       setIsSaving(true);
@@ -298,23 +312,32 @@ const Aiquestions = () => {
 
       console.log('Saving quiz:', quizData);
 
+      // const response = await fetch(`http://localhost:8000/quiz/${user._id}/`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify(quizData),
+      // });
+
       const response = await axios.post(
-        `http://localhost:8000/quiz/${user._id}/`,
+        `http://localhost:8000/quiz/${userId}/`,
         quizData,
         {
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Add auth token here
+            "Content-Type": "application/json"
           }
         }
+
       );
+      console.log(response);
 
-      console.log(response.data); // Axios automatically parses JSON, so use response.data
+      const data = await response.json();
+      console.log(data);
 
-      // Check for response.data for success
-      if (response.status !== 200 && response.status !== 201) { // Check for common success codes
-          throw new Error(response.data.error || 'Failed to save quiz');
-      }
+
+      if (!response.ok) throw new Error(data.error || 'Failed to save quiz');
 
       toast.success('Quiz saved!');
       setShowSaveModal(false);
@@ -322,24 +345,21 @@ const Aiquestions = () => {
       setSavedQuizzes(prev => [
         ...prev,
         {
-          id: response.data.quiz_id || uuidv4(), // Use uuidv4 for client-side ID if not provided by backend
+          id: data.quiz_id || Date.now(),
           score: finalScore,
           date: new Date().toISOString(),
           notes: saveNotes,
         },
       ]);
     } catch (err) {
-      console.error('Error saving quiz:', err.response?.data || err.message);
-      toast.error('Error saving quiz: ' + (err.response?.data?.detail || err.message));
+      toast.error('Error saving quiz: ' + err.message);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleSaveQuiz = () => {
-    // This function will be called from SaveQuizModal
-    handleSubmit(); // Directly call handleSubmit as it contains the saving logic
-  };
+
+
 
 
   // Update the form UI
@@ -374,7 +394,7 @@ const Aiquestions = () => {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleFileUpload(e.target.files[0], 'Image', setSelectedImage)}
+                    onChange={(e) => setSelectedImage(e.target.files[0])}
                     className="hidden"
                     id="image-upload"
                   />
@@ -390,7 +410,7 @@ const Aiquestions = () => {
                   <input
                     type="file"
                     accept="audio/*"
-                    onChange={(e) => handleFileUpload(e.target.files[0], 'Audio', setSelectedAudio)}
+                    onChange={handleAudioChange}
                     className="hidden"
                     id="audio-upload"
                   />
@@ -406,7 +426,7 @@ const Aiquestions = () => {
                   <input
                     type="file"
                     accept="video/*"
-                    onChange={(e) => handleFileUpload(e.target.files[0], 'Video', setSelectedVideo)}
+                    onChange={(e) => setSelectedVideo(e.target.files[0])}
                     className="hidden"
                     id="video-upload"
                   />
@@ -459,7 +479,7 @@ const Aiquestions = () => {
                     placeholder="Enter URL to generate questions..."
                     value={formData.url}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    className="w-full p-4 pl-12 bg-white/5 border border-purple-500/30 rounded-xl
+                    className="w-full p-4 pl-12 bg-white/5 border border-purple-500/30 rounded-xl 
                       text-white placeholder-purple-200/50 focus:outline-none focus:border-purple-500"
                   />
                   <FaLink className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 text-lg" />
@@ -470,7 +490,7 @@ const Aiquestions = () => {
                     placeholder="Enter Wikipedia article title..."
                     value={formData.wikipediaTitle}
                     onChange={(e) => setFormData({ ...formData, wikipediaTitle: e.target.value })}
-                    className="w-full p-4 pl-12 bg-white/5 border border-purple-500/30 rounded-xl
+                    className="w-full p-4 pl-12 bg-white/5 border border-purple-500/30 rounded-xl 
                       text-white placeholder-purple-200/50 focus:outline-none focus:border-purple-500"
                   />
                   <FaWikipediaW className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 text-lg" />
@@ -536,7 +556,7 @@ const Aiquestions = () => {
                   source.condition && (
                     <span
                       key={index}
-                      className={`px-3 py-1 rounded-full text-sm bg-${source.color}-500/20
+                      className={`px-3 py-1 rounded-full text-sm bg-${source.color}-500/20 
                         text-${source.color}-300 flex items-center gap-1`}
                     >
                       <span>•</span>
@@ -635,59 +655,7 @@ const Aiquestions = () => {
           </div>
         )}
       </div>
-      <div className="p-6">
-        {showResults && (
-          <div className="mt-6 text-center text-white">
-            {/* <h3 className="text-2xl font-bold">Your Score: {score.toFixed(1)}%</h3> */}
-            <div className="mt-4 flex justify-center space-x-4">
-              <button
-                onClick={() => setShowSaveModal(true)}
-                className="px-6 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg flex items-center space-x-2"
-              >
-                <FaRegBookmark />
-                <span>Save Quiz</span>
-              </button>
-              <button
-                onClick={() => {
-                  setShowResults(false);
-                  setQuestions([]);
-                  setSelectedAnswers({}); // Corrected to empty object
-                  setScore(0);
-                  // Also reset file and URL inputs when starting a new quiz
-                  setSelectedImage(null);
-                  setSelectedAudio(null);
-                  setSelectedVideo(null);
-                  setSelectedPdf(null);
-                  setSelectedWord(null);
-                  setSelectedExcel(null);
-                  setSelectedPpt(null);
-                  setFormData(prev => ({
-                    ...prev,
-                    topic: '',
-                    url: '',
-                    wikipediaTitle: ''
-                  }));
-                }}
-                className="px-6 py-2 bg-gray-500 hover:bg-gray-600 rounded-lg"
-              >
-                New Quiz
-              </button>
-            </div>
-          </div>
-        )}
 
-        {showSaveModal && (
-          <SaveQuizModal
-            saveNotes={saveNotes}
-            setSaveNotes={setSaveNotes}
-            setShowSaveModal={setShowSaveModal}
-            isSaving={isSaving}
-            handleSaveQuiz={handleSaveQuiz}
-          />
-        )}
-
-        <SavedQuizzesList savedQuizzes={savedQuizzes} />
-      </div>
     </div>
 
   );

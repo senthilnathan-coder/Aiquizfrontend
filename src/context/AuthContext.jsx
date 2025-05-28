@@ -38,6 +38,8 @@ export const AuthProvider = ({ children }) => {
                 email,
             };
 
+            const userId = data.user_id;
+
             const authData = {
                 user: userData,
                 token: data.token,
@@ -46,6 +48,7 @@ export const AuthProvider = ({ children }) => {
             setUser(userData);
             setToken(data.token);
             localStorage.setItem('auth', JSON.stringify(authData));
+            localStorage.setItem('userId', userId);
 
             return { success: true };
         } catch (error) {

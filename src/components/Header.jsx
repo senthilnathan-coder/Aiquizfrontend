@@ -139,6 +139,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     await logout();
+    localStorage.removeItem("userId");
     navigate('/login');
   };
 
