@@ -1,13 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BsCheckCircleFill, BsRocketTakeoff } from 'react-icons/bs';
-import { TbBrandOpenai } from 'react-icons/tb';
-import { MdEmail } from 'react-icons/md';
-import Scrolling from './Section_two';
-import Section_two from './Section_two';
 import { FaRobot } from 'react-icons/fa';
 
-const Home = () => {
+const Section_one = () => {
     const navigate = useNavigate();
 
     const handleTryFree = () => {
@@ -15,14 +11,14 @@ const Home = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 mt-10">
-            <div className="px-4 py-25 max-w-7xl mx-auto ">
+        <div className="min-h-auto bg-gray-900 mt-15">
+            <div className="px-4 py-8 max-w-7xl mx-auto ">
                 {/* Hero Section */}
-                <div className="text-center mb-16  ">
+                <div className="text-center mb-16 ">
                     <div className="flex justify-center mb-8">
                         <FaRobot className="w-20 h-20 text-purple-400 mx-auto mb-4 animate-pulse" />
                     </div>
-                    <h1 className="text-4xl sm:text-6xl font-bold text-white mb-6 ">
+                    <h1 className="text-4xl sm:text-6xl font-bold text-white mb-8 leading-17">
                         DigiAiQuest<br />
                         <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text ">
                             AI-Powered Question Generator
@@ -77,11 +73,8 @@ const Home = () => {
 
 
             </div>
-            <div className="">
-                <Section_two />
-            </div>
         </div>
     );
 };
 
-export default Home;
+export default Section_one;
