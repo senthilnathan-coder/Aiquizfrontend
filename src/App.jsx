@@ -6,7 +6,7 @@ import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import ProtectedRoute from './components/shared/ProtectedRoute';
 
 // Import your components
-import Home from './Pages/Home';
+import Home from './Pages/Home/Index';
 import Login from './Pages/Registration/Login';
 import Signup from './Pages/Registration/Signup';
 import UserDashboard from './Pages/User/Dashboard';
@@ -15,7 +15,8 @@ import SuperDashboard from './Pages/SuperAdmin/SuperDashboard';
 import PricingPlans from './Pages/Pricing/PricingPlans';
 import CustomPackageBuilder from './components/CustomPackageBuilder';
 import Aiquestions from './Pages/Paginations/Aiquestions';
-// import Join from './Pages/Admin/join';
+import Aioptions from './Pages/Paginations/Aioptions';
+import Aimentor from './Pages/Paginations/Aimentor';
 
 const App = () => {
   return (
@@ -67,6 +68,22 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Aiquestions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="aioption"
+                element={
+                  <ProtectedRoute>
+                    <Aioptions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="aimentor"
+                element={
+                  <ProtectedRoute>
+                    <Aimentor />
                   </ProtectedRoute>
                 }
               />

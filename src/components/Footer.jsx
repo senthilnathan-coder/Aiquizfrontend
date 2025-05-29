@@ -2,7 +2,7 @@ import React from 'react';
 import { FaLinkedin, FaYoutube, FaTwitter, FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import { TbBrandOpenai } from "react-icons/tb";
 import company from "../assets/Logo.png";
-
+import { FaSquareInstagram } from "react-icons/fa6";
 const socialLinks = [
     {
         icon: <FaLinkedin size={20} />,
@@ -24,6 +24,12 @@ const socialLinks = [
     },
     {
         icon: <FaFacebook size={20} />,
+        path: '/',
+        label: 'Facebook',
+        color: 'hover:text-blue-600 hover:bg-blue-600/10'
+    },
+     {
+        icon: <FaSquareInstagram size={20} />,
         path: '/',
         label: 'Facebook',
         color: 'hover:text-blue-600 hover:bg-blue-600/10'
