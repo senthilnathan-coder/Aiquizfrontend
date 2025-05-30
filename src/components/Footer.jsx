@@ -3,38 +3,42 @@ import { FaLinkedin, FaYoutube, FaTwitter, FaFacebook, FaEnvelope, FaPhoneAlt, F
 import { TbBrandOpenai } from "react-icons/tb";
 import company from "../assets/Logo.png";
 import { FaSquareInstagram } from "react-icons/fa6";
+import { Link, useNavigate } from 'react-router-dom';
 const socialLinks = [
     {
+        icon: <FaFacebook size={20} />,
+        path: 'https://www.facebook.com/dialkaraikudi',
+        label: 'Facebook',
+        color: 'hover:text-blue-600 hover:bg-blue-600/10'
+    },
+    {
+        icon: <FaSquareInstagram size={20} />,
+        path: 'https://www.instagram.com/dialkaraikudi/#',
+        label: 'Instagram',
+        color: 'hover:text-blue-600 hover:bg-blue-600/10'
+    },
+    {
         icon: <FaLinkedin size={20} />,
-        path: '/',
+        path: 'https://www.linkedin.com/company/dialkaraikudi',
         label: 'LinkedIn',
         color: 'hover:text-blue-500 hover:bg-blue-500/10'
     },
     {
         icon: <FaYoutube size={20} />,
-        path: '/',
+        path: 'https://www.youtube.com/@dialkaraikudi',
         label: 'YouTube',
         color: 'hover:text-red-500 hover:bg-red-500/10'
     },
-    {
-        icon: <FaTwitter size={20} />,
-        path: '/',
-        label: 'Twitter',
-        color: 'hover:text-sky-500 hover:bg-sky-500/10'
-    },
-    {
-        icon: <FaFacebook size={20} />,
-        path: '/',
-        label: 'Facebook',
-        color: 'hover:text-blue-600 hover:bg-blue-600/10'
-    },
-     {
-        icon: <FaSquareInstagram size={20} />,
-        path: '/',
-        label: 'Facebook',
-        color: 'hover:text-blue-600 hover:bg-blue-600/10'
-    }
+    // {
+    //     icon: <FaTwitter size={20} />,
+    //     path: '/',
+    //     label: 'Twitter',
+    //     color: 'hover:text-sky-500 hover:bg-sky-500/10'
+    // },
+
 ];
+
+
 
 const Footer = () => {
     return (
@@ -44,11 +48,14 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="space-y-6">
                         <div className="flex items-center group cursor-pointer">
-                            <img
-                                src={company}
-                                alt='Logo'
-                                className="text-4xl transition-all duration-300 group-hover:scale-105"
-                            />
+                            <Link to={'/'}>
+                                <img
+                                    src={company}
+                                    alt='Logo'
+                                    className="text-4xl transition-all duration-300 group-hover:scale-105"
+
+                                />
+                            </Link>
                         </div>
                         <p className="text-gray-400 text-sm leading-relaxed">
                             The next generation of AI-powered examination platform.
@@ -102,13 +109,15 @@ const Footer = () => {
                                 </span>
                             </a>
                             <div className="flex items-center gap-3 text-gray-400 group">
-                                <span className="p-2 rounded-lg bg-purple-500/10 text-purple-500
+                                <Link to={'/'}>
+                                    <span className="p-2 rounded-lg bg-purple-500/10 text-purple-500
                                              group-hover:scale-110 transition-transform duration-300">
-                                    <FaMapMarkerAlt />
-                                </span>
-                                <span className="group-hover:text-purple-400 transition-colors duration-300">
-                                    8, Muthoorani East, Karaikudi, 630001.
-                                </span>
+                                        <FaMapMarkerAlt />
+                                    </span>
+                                    <span className="group-hover:text-purple-400 transition-colors duration-300">
+                                        8, Muthoorani East, Karaikudi, 630001.
+                                    </span>
+                                </Link>
                             </div>
                         </div>
                     </div>

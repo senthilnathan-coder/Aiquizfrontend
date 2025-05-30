@@ -25,6 +25,7 @@ const Header = () => {
     { value: 'US', label: '🇺🇸 English (US)', region: 'North America' },
     { value: 'GB', label: '🇬🇧 English (UK)', region: 'Europe' },
     { value: 'IN', label: '🇮🇳 हिंदी', region: 'Asia' },
+    { value: 'IN', label: '🇮🇳 हिंदी', region: 'Asia' },
   ];
 
   const groupedOptions = countryOptions.reduce((acc, option) => {

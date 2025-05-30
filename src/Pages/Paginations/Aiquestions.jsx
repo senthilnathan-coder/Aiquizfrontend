@@ -49,129 +49,129 @@ const Aiquestions = () => {
   const userId = user?._id;
 
   const handleSubmit = useCallback(async () => {
-  setTimerActive(false); // Stop the timer immediately upon submission
+    setTimerActive(false); // Stop the timer immediately upon submission
 
-  if (questions.length === 0) {
-    toast.info("No questions to submit or save.");
-    setShowResults(true); // Still show results section, but with 0 score
-    setScore(0);
-    return;
-  }
-
-  let correctCount = 0;
-  questions.forEach((question, index) => {
-    if (selectedAnswers[index] === question.answer) {
-      correctCount++;
+    if (questions.length === 0) {
+      toast.info("No questions to submit or save.");
+      setShowResults(true); // Still show results section, but with 0 score
+      setScore(0);
+      return;
     }
-  });
 
-  const finalScorePercentage = (correctCount / questions.length) * 100;
-  setScore(finalScorePercentage); // Update the score state with percentage
-  setShowResults(true); // Display results to the user
-
-  if (finalScorePercentage >= 80) {
-    toast.success(`Great job! Score: ${finalScorePercentage.toFixed(1)}%`);
-  } else if (finalScorePercentage >= 50) {
-    toast.info(`Good attempt! Score: ${finalScorePercentage.toFixed(1)}%`);
-  } else {
-    toast.warning(`Keep practicing! Score: ${finalScorePercentage.toFixed(1)}%`);
-  }
-
-  if (!userId) {
-    toast.error('User not logged in. Quiz results will not be saved.');
-    return;
-  }
-
-  if (isSaving) {
-    return;
-  }
-
-  try {
-    setIsSaving(true); // Set saving status to true
-
-    const userAnswersDetailed = questions.map((q, index) => ({
-      question_id: q._id || `client_gen_${index}`, // Fallback if _id is not present
-      selected_answer: selectedAnswers[index] || null,
-    }));
-
-    const usedContentTypes = [];
-    if (formData.topic.trim()) usedContentTypes.push('text');
-    if (selectedImage) usedContentTypes.push('image');
-    if (selectedAudio) usedContentTypes.push('audio');
-    if (selectedVideo) usedContentTypes.push('video');
-    if (selectedPdf) usedContentTypes.push('pdf');
-    if (selectedWord) usedContentTypes.push('word');
-    if (selectedExcel) usedContentTypes.push('excel');
-    if (selectedPpt) usedContentTypes.push('ppt');
-    if (formData.url?.trim()) usedContentTypes.push('url');
-    if (formData.wikipediaTitle?.trim()) usedContentTypes.push('wikipedia');
-
-    // Determine the primary content/topic for the initial submission.
-    // This is often the topic the quiz was *generated* from.
-    // Your backend might use a field like 'content' or 'topic' for this.
-    let quizContentTopic = mainTopic || formData.topic.trim();
-    if (!quizContentTopic && formData.url?.trim()) quizContentTopic = formData.url.trim();
-    if (!quizContentTopic && formData.wikipediaTitle?.trim()) quizContentTopic = formData.wikipediaTitle.trim();
-    if (!quizContentTopic) quizContentTopic = "AI Generated Quiz"; // Fallback if no specific content type provides a clear topic
-
-    const quizAttemptData = {
-      user: userId,
-      questions: questions, // Sending the full questions array as returned by the backend
-      user_answers: userAnswersDetailed, // Detailed array of user's selected answers
-      score: finalScorePercentage, // Percentage score
-      total: questions.length, // Total number of questions
-      difficulty: formData.difficulty,
-      question_type: formData.questionType,
-      topics: mainTopic ? [mainTopic] : [], // Ensure this is an array of strings
-      content_types: usedContentTypes, // Array of content types used for generation
-      time_taken: formData.timeLimit - timeLeft, // Calculate actual time taken
-      submitted: true, // Crucial for backend to know this is a submission attempt
-      content: quizContentTopic, // Include 'content' here if your backend expects it for the overall quiz topic.
-                                 // Based on your initial log, it was present, so keep it.
-      // --------------------------------------------------------------------------
-      // REMOVE THE 'NOTES' FIELD FROM HERE. It should only be added via handleSaveQuiz.
-      // notes: "good experences", // <--- THIS LINE MUST BE REMOVED
-      // --------------------------------------------------------------------------
-    };
-
-    console.log("Sending quiz attempt data for submission:", quizAttemptData);
-
-    const response = await axios.post(
-      `http://localhost:8000/quiz/${userId}/`,
-      quizAttemptData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json', // Ensure JSON content type for submission
-        }
+    let correctCount = 0;
+    questions.forEach((question, index) => {
+      if (selectedAnswers[index] === question.answer) {
+        correctCount++;
       }
-    );
+    });
 
-    console.log('Quiz results saved:', response.data);
-    toast.success('Quiz results saved successfully!');
-    // Store the quiz attempt ID received from the backend if available
-    // THIS IS CRUCIAL FOR handleSaveQuiz TO WORK LATER
-    if (response.data.quiz_id) {
-      setCurrentQuizAttemptId(response.data.quiz_id);
+    const finalScorePercentage = (correctCount / questions.length) * 100;
+    setScore(finalScorePercentage); // Update the score state with percentage
+    setShowResults(true); // Display results to the user
+
+    if (finalScorePercentage >= 80) {
+      toast.success(`Great job! Score: ${finalScorePercentage.toFixed(1)}%`);
+    } else if (finalScorePercentage >= 50) {
+      toast.info(`Good attempt! Score: ${finalScorePercentage.toFixed(1)}%`);
     } else {
-      console.warn("Backend did not return a quiz_id for the submitted attempt.");
-      // You might need a fallback if quiz_id isn't always returned immediately
-      // For example, if the backend uses the user ID and timestamp to identify.
-      // However, a unique quiz_id is highly recommended.
+      toast.warning(`Keep practicing! Score: ${finalScorePercentage.toFixed(1)}%`);
     }
 
-  } catch (err) {
-    const errorMsg =
-      err.response?.data?.error || err.message || 'Failed to save quiz results.';
-    toast.error('Error saving quiz: ' + errorMsg);
-    console.error("Save error during submission:", err.response?.data || err);
-    // Log the full response data for more specific backend errors
-    // console.error("Full error response data:", err.response?.data);
-    // console.error("Error status:", err.response?.status);
-  } finally {
-    setIsSaving(false);
-  }
-}, [userId, questions, selectedAnswers, formData.difficulty, formData.questionType, mainTopic, formData.timeLimit, timeLeft, isSaving, token, selectedImage, selectedAudio, selectedVideo, selectedPdf, selectedWord, selectedExcel, selectedPpt, formData.topic, formData.url, formData.wikipediaTitle]); // Dependencies for useCallback
+    if (!userId) {
+      toast.error('User not logged in. Quiz results will not be saved.');
+      return;
+    }
+
+    if (isSaving) {
+      return;
+    }
+
+    try {
+      setIsSaving(true); // Set saving status to true
+
+      const userAnswersDetailed = questions.map((q, index) => ({
+        question_id: q._id || `client_gen_${index}`, // Fallback if _id is not present
+        selected_answer: selectedAnswers[index] || null,
+      }));
+
+      const usedContentTypes = [];
+      if (formData.topic.trim()) usedContentTypes.push('text');
+      if (selectedImage) usedContentTypes.push('image');
+      if (selectedAudio) usedContentTypes.push('audio');
+      if (selectedVideo) usedContentTypes.push('video');
+      if (selectedPdf) usedContentTypes.push('pdf');
+      if (selectedWord) usedContentTypes.push('word');
+      if (selectedExcel) usedContentTypes.push('excel');
+      if (selectedPpt) usedContentTypes.push('ppt');
+      if (formData.url?.trim()) usedContentTypes.push('url');
+      if (formData.wikipediaTitle?.trim()) usedContentTypes.push('wikipedia');
+
+      // Determine the primary content/topic for the initial submission.
+      // This is often the topic the quiz was *generated* from.
+      // Your backend might use a field like 'content' or 'topic' for this.
+      let quizContentTopic = mainTopic || formData.topic.trim();
+      if (!quizContentTopic && formData.url?.trim()) quizContentTopic = formData.url.trim();
+      if (!quizContentTopic && formData.wikipediaTitle?.trim()) quizContentTopic = formData.wikipediaTitle.trim();
+      if (!quizContentTopic) quizContentTopic = "AI Generated Quiz"; // Fallback if no specific content type provides a clear topic
+
+      const quizAttemptData = {
+        user: userId,
+        questions: questions, // Sending the full questions array as returned by the backend
+        user_answers: userAnswersDetailed, // Detailed array of user's selected answers
+        score: finalScorePercentage, // Percentage score
+        total: questions.length, // Total number of questions
+        difficulty: formData.difficulty,
+        question_type: formData.questionType,
+        topics: mainTopic ? [mainTopic] : [], // Ensure this is an array of strings
+        content_types: usedContentTypes, // Array of content types used for generation
+        time_taken: formData.timeLimit - timeLeft, // Calculate actual time taken
+        submitted: true, // Crucial for backend to know this is a submission attempt
+        content: quizContentTopic, // Include 'content' here if your backend expects it for the overall quiz topic.
+        // Based on your initial log, it was present, so keep it.
+        // --------------------------------------------------------------------------
+        // REMOVE THE 'NOTES' FIELD FROM HERE. It should only be added via handleSaveQuiz.
+        // notes: "good experences", // <--- THIS LINE MUST BE REMOVED
+        // --------------------------------------------------------------------------
+      };
+
+      console.log("Sending quiz attempt data for submission:", quizAttemptData);
+
+      const response = await axios.post(
+        `http://localhost:8000/quiz/${userId}/`,
+        quizAttemptData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json', // Ensure JSON content type for submission
+          }
+        }
+      );
+
+      console.log('Quiz results saved:', response.data);
+      toast.success('Quiz results saved successfully!');
+      // Store the quiz attempt ID received from the backend if available
+      // THIS IS CRUCIAL FOR handleSaveQuiz TO WORK LATER
+      if (response.data.quiz_id) {
+        setCurrentQuizAttemptId(response.data.quiz_id);
+      } else {
+        console.warn("Backend did not return a quiz_id for the submitted attempt.");
+        // You might need a fallback if quiz_id isn't always returned immediately
+        // For example, if the backend uses the user ID and timestamp to identify.
+        // However, a unique quiz_id is highly recommended.
+      }
+
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.error || err.message || 'Failed to save quiz results.';
+      toast.error('Error saving quiz: ' + errorMsg);
+      console.error("Save error during submission:", err.response?.data || err);
+      // Log the full response data for more specific backend errors
+      // console.error("Full error response data:", err.response?.data);
+      // console.error("Error status:", err.response?.status);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [userId, questions, selectedAnswers, formData.difficulty, formData.questionType, mainTopic, formData.timeLimit, timeLeft, isSaving, token, selectedImage, selectedAudio, selectedVideo, selectedPdf, selectedWord, selectedExcel, selectedPpt, formData.topic, formData.url, formData.wikipediaTitle]); // Dependencies for useCallback
   // --- NEW handleSaveQuiz Function (for saving notes/specific quiz instance) ---
   const handleSaveQuiz = async (notes) => { // Assuming 'notes' is passed here
     if (!user || !token || !currentQuizAttemptId) { // Check for currentQuizAttemptId
@@ -403,6 +403,7 @@ const Aiquestions = () => {
       });
 
       const data = response.data;
+      
 
       // Validate the structure of the response
       if (!data || !Array.isArray(data.questions) || data.questions.length === 0) {

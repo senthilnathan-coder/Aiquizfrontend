@@ -2,83 +2,86 @@ import React from 'react';
 import { SiGoogleforms } from 'react-icons/si';
 import { MdQuiz, MdAssignment, MdSchool } from 'react-icons/md';
 import { TbBrandOpenai, TbPlayerPlay } from 'react-icons/tb';
+import { MdOutlineDescription } from "react-icons/md";
+import { FaCode } from "react-icons/fa";
+import { HiOutlineClipboardList } from "react-icons/hi";
 import { useNavigate } from 'react-router-dom';
 
-const cards = 
- [
-  {
-    icon: <TbBrandOpenai className="text-4xl text-indigo-500" />,
-    title: "Quizzes ",
-    description: "Quick questions, quicker minds — sharpen your edge.",
-    bgColor: "bg-indigo-50",
-    hoverColor: "hover:bg-indigo-100",
-    path: "/aioption",
-    isComingSoon: true,
-  },
-  {
-    icon: <MdSchool className="text-4xl text-teal-500" />,
-    title: "AI Mentor",
-    description: "Your personalized AI tutor to guide learning paths.",
-    bgColor: "bg-teal-50",
-    hoverColor: "hover:bg-teal-100",
-    path: "/aimentor",
-    isComingSoon: true,
-  },
-  {
-    icon: <SiGoogleforms className="text-4xl text-red-500" />,
-    title: "Online Exams",
-    description: "Conduct secure and flexible exams anytime, anywhere.",
-    bgColor: "bg-red-50",
-    hoverColor: "hover:bg-red-100",
-    path: "/online-exam",
-    isComingSoon: true,
-  },
-  {
-    icon: <MdQuiz className="text-4xl text-orange-500" />,
-    title: "AI Questions Generator",
-    description: " Never run out of questions. Let AI fuel your curiosity.",
-    bgColor: "bg-orange-50",
-    hoverColor: "hover:bg-orange-100",
-    path: "/quizzes",
-    isComingSoon: true,
-  },
-  {
-    icon: <MdAssignment className="text-4xl text-purple-500" />,
-    title: "Paper Exams",
-    description: "Upload and manage traditional written exams digitally.",
-    bgColor: "bg-purple-50",
-    hoverColor: "hover:bg-purple-100",
-    path: "/paper-exams",
-    isComingSoon: true,
-  },
-  {
-    icon: <MdAssignment className="text-4xl text-blue-500" />,
-    title: "Code Assignment",
-    description: "Assign and evaluate coding tasks with ease.",
-    bgColor: "bg-blue-50",
-    hoverColor: "hover:bg-blue-100",
-    path: "/code-assignment",
-    isComingSoon: true,
-  },
-  {
-    icon: <MdAssignment className="text-4xl text-pink-500" />,
-    title: "Paper Assignment",
-    description: "Manage and track traditional assignments digitally.",
-    bgColor: "bg-pink-50",
-    hoverColor: "hover:bg-pink-100",
-    path: "/paper-assignment",
-    isComingSoon: true,
-  },
-  {
-    icon: <TbPlayerPlay className="text-4xl text-emerald-500" />,
-    title: "Interactive Lessons",
-    description: "Deliver lessons with videos, quizzes & hands-on tasks.",
-    bgColor: "bg-emerald-50",
-    hoverColor: "hover:bg-emerald-100",
-    path: "/lessons",
-    isComingSoon: true,
-  },
-];
+const cards =
+    [
+        {
+            icon: <TbBrandOpenai className="text-4xl text-indigo-500" />,
+            title: "Quizzes ",
+            description: "Quick questions, quicker minds — sharpen your edge.",
+            bgColor: "bg-indigo-50",
+            hoverColor: "hover:bg-indigo-100",
+            path: "/aioption",
+            isComingSoon: true,
+        },
+        {
+            icon: <MdSchool className="text-4xl text-teal-500" />,
+            title: "AI Mentor",
+            description: "Your personalized AI tutor to guide learning paths.",
+            bgColor: "bg-teal-50",
+            hoverColor: "hover:bg-teal-100",
+            path: "/aimentor",
+            isComingSoon: true,
+        },
+        {
+            icon: <SiGoogleforms className="text-4xl text-red-500" />,
+            title: "Online Exams",
+            description: "Conduct secure and flexible exams anytime, anywhere.",
+            bgColor: "bg-red-50",
+            hoverColor: "hover:bg-red-100",
+            path: "/online-exam",
+            isComingSoon: true,
+        },
+        {
+            icon: <MdQuiz className="text-4xl text-orange-500" />,
+            title: "AI Questions Generator",
+            description: " Never run out of questions. Let AI fuel your curiosity.",
+            bgColor: "bg-orange-50",
+            hoverColor: "hover:bg-orange-100",
+            path: "/quizzes",
+            isComingSoon: true,
+        },
+        {
+            icon: <HiOutlineClipboardList className="text-4xl text-purple-500" />,
+            title: "Paper Exams",
+            description: "Upload and manage traditional written exams digitally.",
+            bgColor: "bg-purple-50",
+            hoverColor: "hover:bg-purple-100",
+            path: "/paper-exams",
+            isComingSoon: true,
+        },
+        {
+            icon: <FaCode className="text-4xl text-blue-500" />,
+            title: "Code Assignment",
+            description: "Assign and evaluate coding tasks with ease.",
+            bgColor: "bg-blue-50",
+            hoverColor: "hover:bg-blue-100",
+            path: "/code-assignment",
+            isComingSoon: true,
+        },
+        {
+            icon: <MdOutlineDescription className="text-4xl text-pink-500" />,
+            title: "Paper Assignment",
+            description: "Manage and track traditional assignments digitally.",
+            bgColor: "bg-pink-50",
+            hoverColor: "hover:bg-pink-100",
+            path: "/paper-assignment",
+            isComingSoon: true,
+        },
+        {
+            icon: <TbPlayerPlay className="text-4xl text-emerald-500" />,
+            title: "Interactive Lessons",
+            description: "Deliver lessons with videos, quizzes & hands-on tasks.",
+            bgColor: "bg-emerald-50",
+            hoverColor: "hover:bg-emerald-100",
+            path: "/lessons",
+            isComingSoon: true,
+        },
+    ];
 
 
 
@@ -96,7 +99,7 @@ const Section_two = () => {
             <div className="max-w-full mx-auto p-4">
                 {/* Section Title */}
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4 ">
+                    <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent py-2 mb-4 ">
                         Unlock Smarter Learning, Powered by AI
                     </h2>
                     <p className="text-gray-600 max-w-2xl mx-auto">
