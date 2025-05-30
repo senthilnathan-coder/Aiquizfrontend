@@ -22,7 +22,7 @@ const UserDashboard = () => {
     // ... (rest of your existing code)
     try {
       const response = await axios.get(
-        `http://localhost:8000/userdashboard/${user._id}/`,
+        `http://127.0.0.1:8000/userdashboard/${user._id}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -39,6 +39,8 @@ const UserDashboard = () => {
     }
   };
 
+
+  
   useEffect(() => {
     fetchDashboardData();
   }, [user, token]); // Depend on user and token for re-fetching
@@ -271,7 +273,7 @@ const UserDashboard = () => {
                       className="p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition"
                     >
                       <p className="font-medium text-purple-900">{quiz.notes || 'No notes'}</p>
-{/* // Add this line to show the topic of the saved quiz */}
+                      {/* // Add this line to show the topic of the saved quiz */}
                       <p className="text-gray-600 text-sm mt-1">
                         Topic: {quiz.topics?.join(', ') || 'N/A'}
                       </p>
