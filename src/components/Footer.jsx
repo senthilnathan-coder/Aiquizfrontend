@@ -4,6 +4,7 @@ import { TbBrandOpenai } from "react-icons/tb";
 import company from "../assets/Logo.png";
 import { FaSquareInstagram } from "react-icons/fa6";
 import { Link, useNavigate } from 'react-router-dom';
+
 const socialLinks = [
     {
         icon: <FaFacebook size={20} />,
@@ -109,9 +110,13 @@ const Footer = () => {
                                 </span>
                             </a>
                             <div className="flex items-center gap-3 text-gray-400 group">
-                                <Link to={'/'}>
-                                    <span className="p-2 rounded-lg bg-purple-500/10 text-purple-500
-                                             group-hover:scale-110 transition-transform duration-300">
+                                <Link
+                                    to="https://www.google.com/maps?q=8,+Muthoorani+East,+Karaikudi,+630001"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3"
+                                >
+                                    <span className="p-2 rounded-lg bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform duration-300">
                                         <FaMapMarkerAlt />
                                     </span>
                                     <span className="group-hover:text-purple-400 transition-colors duration-300">

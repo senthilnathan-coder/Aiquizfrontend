@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BsCheckCircleFill, BsRocketTakeoff } from 'react-icons/bs';
 import { FaRobot } from 'react-icons/fa';
+import digiaiquest from '../../assets/digiaiquest.mp4'
 
 const Section_one = () => {
     const navigate = useNavigate();
@@ -12,7 +13,20 @@ const Section_one = () => {
 
     return (
         <div className="min-h-auto bg-gray-900 mt-15">
-            <div className="px-4 py-8 max-w-7xl mx-auto ">
+            {/* Background Video */}
+            <video
+                autoPlay
+                muted
+                loop
+                className="absolute top-0 left-0 w-full h-[88.4vh] sm:h-[80vh] md:h-[74.2vh] lg:h-[78vh] xl:h-[85vh] 2xl:h-[78vh] object-cover z-0 opacity-60"
+            >
+                <source src={digiaiquest} type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+
+            {/* Dark Overlay */}
+            {/* <div className="absolute inset-0 bg-black bg-opacity-60 z-10" /> */}
+            <div className="relative z-20 px-4 py-8 max-w-7xl mx-auto">
                 {/* Hero Section */}
                 <div className="text-center mb-16 ">
                     <div className="flex justify-center mb-8">
@@ -34,7 +48,7 @@ const Section_one = () => {
                 <div className="flex flex-col sm:flex-row justify-center items-stretch gap-3 sm:gap-4 mb-16 px-4 sm:px-0 max-w-lg mx-auto">
                     <button
                         onClick={handleTryFree}
-                        className="flex-1 group relative px-6 sm:px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-xl hover:shadow-purple-500/25 transition-all duration-300 overflow-hidden"
+                        className=" group relative px-6 sm:px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-xl hover:shadow-purple-500/25 transition-all duration-300 overflow-hidden cursor-pointer"
                     >
                         <span className="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></span>
                         <span className="relative flex items-center justify-center gap-2 text-sm sm:text-base font-medium">
@@ -42,36 +56,7 @@ const Section_one = () => {
                             Try Now
                         </span>
                     </button>
-                    {/* <button
-                        onClick={() => navigate('/signup')}
-                        className="flex-1 group relative px-6 sm:px-8 py-3.5 bg-white/5 backdrop-blur-sm text-white rounded-xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300"
-                    >
-                        <span className="relative flex items-center justify-center gap-2 text-sm sm:text-base font-medium">
-                            <BsCheckCircleFill className="text-lg" />
-                            Register Now
-                        </span>
-                    </button> */}
                 </div>
-
-                {/* Features Preview */}
-                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-                    {[
-                        { title: "AI Question Generation", desc: "Generate unique questions instantly" },
-                        { title: "Smart Assessment", desc: "Automated grading and feedback" },
-                        { title: "Custom Templates", desc: "Create your own question formats" },
-                        // { title: "Online Exam", desc: "" },
-                        // { title: "Quizzes", desc: "" },
-                        // { title: "Code Assignment", desc: "" },
-                        // { title: "Intractive Lesson", desc: "" },
-                    ].map((feature, index) => (
-                        <div key={index} className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
-                            <h3 className="text-white text-xl font-semibold mb-2">{feature.title}</h3>
-                            <p className="text-gray-400">{feature.desc}</p>
-                        </div>
-                    ))}
-                </div> */}
-
-
             </div>
         </div>
     );

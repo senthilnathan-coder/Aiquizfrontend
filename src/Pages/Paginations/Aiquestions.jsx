@@ -116,25 +116,22 @@ const Aiquestions = () => {
 
       const quizAttemptData = {
         user: userId,
-        questions: questions, // Sending the full questions array as returned by the backend
-        user_answers: userAnswersDetailed, // Detailed array of user's selected answers
-        score: finalScorePercentage, // Percentage score
-        total: questions.length, // Total number of questions
-        difficulty: formData.difficulty,
-        question_type: formData.questionType,
-        topics: mainTopic ? [mainTopic] : [], // Ensure this is an array of strings
-        content_types: usedContentTypes, // Array of content types used for generation
-        time_taken: formData.timeLimit - timeLeft, // Calculate actual time taken
-        submitted: true, // Crucial for backend to know this is a submission attempt
-        content: quizContentTopic, // Include 'content' here if your backend expects it for the overall quiz topic.
-        // Based on your initial log, it was present, so keep it.
-        // --------------------------------------------------------------------------
-        // REMOVE THE 'NOTES' FIELD FROM HERE. It should only be added via handleSaveQuiz.
-        // notes: "good experences", // <--- THIS LINE MUST BE REMOVED
-        // --------------------------------------------------------------------------
+        questions: Array.isArray(questions) ? questions : [],
+        user_answers: Array.isArray(userAnswersDetailed) ? userAnswersDetailed : [],
+        score: typeof finalScorePercentage === 'number' ? finalScorePercentage : 0,
+        total: Array.isArray(questions) ? questions.length : 0,
+        difficulty: formData.difficulty || 'medium',
+        question_type: formData.questionType || 'multiple-choice',
+        topics: mainTopic ? [mainTopic] : [],
+        content_types: Array.isArray(usedContentTypes) ? usedContentTypes : [],
+        time_taken: formData.timeLimit - timeLeft,
+        submitted: true,
+        content: quizContentTopic || 'Untitled Quiz',
       };
 
-      console.log("Sending quiz attempt data for submission:", quizAttemptData);
+
+      console.log("📤 Sending quizAttemptData:", JSON.stringify(quizAttemptData, null, 2));
+
 
       const response = await axios.post(
         `http://localhost:8000/quiz/${userId}/`,
@@ -403,7 +400,6 @@ const Aiquestions = () => {
       });
 
       const data = response.data;
-      
 
       // Validate the structure of the response
       if (!data || !Array.isArray(data.questions) || data.questions.length === 0) {
@@ -1501,4 +1497,3 @@ export default Aiquestions;
 // };
 
 // export default Aiquestions;
-

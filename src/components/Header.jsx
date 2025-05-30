@@ -21,12 +21,22 @@ const Header = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
-  const countryOptions = [
-    { value: 'US', label: '🇺🇸 English (US)', region: 'North America' },
-    { value: 'GB', label: '🇬🇧 English (UK)', region: 'Europe' },
-    { value: 'IN', label: '🇮🇳 हिंदी', region: 'Asia' },
-    { value: 'IN', label: '🇮🇳 हिंदी', region: 'Asia' },
+  const countryOptions  = [
+    { value: 'en', label: '🇺🇸 English', region: 'Global' },
+    { value: 'ta', label: '🇮🇳 Tamil', region: 'Asia' },
+    { value: 'hi', label: '🇮🇳 Hindi', region: 'Asia' },
+    { value: 'es', label: '🇪🇸 Spanish', region: 'Europe / Latin America' },
+    { value: 'fr', label: '🇫🇷 French', region: 'Europe / Africa' },
+    { value: 'de', label: '🇩🇪 German', region: 'Europe' },
+    { value: 'ja', label: '🇯🇵 Japanese', region: 'Asia' },
+    { value: 'ar', label: '🇸🇦 Arabic', region: 'Middle East / Africa' },
+    { value: 'ru', label: '🇷🇺 Russian', region: 'Europe / Asia' },
+    { value: 'bn', label: '🇧🇩 Bengali', region: 'Asia' },
+    { value: 'ml', label: '🇮🇳 Malayalam', region: 'Asia' },
+    { value: 'te', label: '🇮🇳 Telugu', region: 'Asia' },
+    { value: 'kn', label: '🇮🇳 Kannada', region: 'Asia' },
   ];
+
 
   const groupedOptions = countryOptions.reduce((acc, option) => {
     const group = acc.find((g) => g.label === option.region);

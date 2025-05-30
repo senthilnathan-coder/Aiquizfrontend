@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 const cards =
     [
         {
-            icon: <TbBrandOpenai className="text-4xl text-indigo-500" />,
+            icon: <TbBrandOpenai className="text-4xl " />,
             title: "Quizzes ",
             description: "Quick questions, quicker minds — sharpen your edge.",
             bgColor: "bg-indigo-50",
@@ -19,7 +19,7 @@ const cards =
             isComingSoon: true,
         },
         {
-            icon: <MdSchool className="text-4xl text-teal-500" />,
+            icon: <MdSchool className="text-4xl " />,
             title: "AI Mentor",
             description: "Your personalized AI tutor to guide learning paths.",
             bgColor: "bg-teal-50",
@@ -28,7 +28,7 @@ const cards =
             isComingSoon: true,
         },
         {
-            icon: <SiGoogleforms className="text-4xl text-red-500" />,
+            icon: <SiGoogleforms className="text-4xl " />,
             title: "Online Exams",
             description: "Conduct secure and flexible exams anytime, anywhere.",
             bgColor: "bg-red-50",
@@ -37,7 +37,7 @@ const cards =
             isComingSoon: true,
         },
         {
-            icon: <MdQuiz className="text-4xl text-orange-500" />,
+            icon: <MdQuiz className="text-4xl " />,
             title: "AI Questions Generator",
             description: " Never run out of questions. Let AI fuel your curiosity.",
             bgColor: "bg-orange-50",
@@ -46,7 +46,7 @@ const cards =
             isComingSoon: true,
         },
         {
-            icon: <HiOutlineClipboardList className="text-4xl text-purple-500" />,
+            icon: <HiOutlineClipboardList className="text-4xl " />,
             title: "Paper Exams",
             description: "Upload and manage traditional written exams digitally.",
             bgColor: "bg-purple-50",
@@ -55,7 +55,7 @@ const cards =
             isComingSoon: true,
         },
         {
-            icon: <FaCode className="text-4xl text-blue-500" />,
+            icon: <FaCode className="text-4xl " />,
             title: "Code Assignment",
             description: "Assign and evaluate coding tasks with ease.",
             bgColor: "bg-blue-50",
@@ -64,7 +64,7 @@ const cards =
             isComingSoon: true,
         },
         {
-            icon: <MdOutlineDescription className="text-4xl text-pink-500" />,
+            icon: <MdOutlineDescription className="text-4xl " />,
             title: "Paper Assignment",
             description: "Manage and track traditional assignments digitally.",
             bgColor: "bg-pink-50",
@@ -73,7 +73,7 @@ const cards =
             isComingSoon: true,
         },
         {
-            icon: <TbPlayerPlay className="text-4xl text-emerald-500" />,
+            icon: <TbPlayerPlay className="text-4xl " />,
             title: "Interactive Lessons",
             description: "Deliver lessons with videos, quizzes & hands-on tasks.",
             bgColor: "bg-emerald-50",
@@ -95,60 +95,57 @@ const Section_two = () => {
     };
 
     return (
-        <section className="bg-gradient-to-b from-gray-50 to-white py-10 h-fit">
-            <div className="max-w-full mx-auto p-4">
-                {/* Section Title */}
+        <section className="bg-gradient-to-b from-gray-800 to-blue-950 py-16 text-white h-auto">
+            <div className="max-w-7xl mx-auto px-4">
+                {/* Title */}
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent py-2 mb-4 ">
+                    <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                         Unlock Smarter Learning, Powered by AI
                     </h2>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-gray-300 mt-4 max-w-2xl mx-auto">
                         From question generation to full-fledged assessments — everything you need to educate, evaluate, and elevate in one intelligent suite.
                     </p>
                 </div>
 
-                {/* Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 ">
+                {/* Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     {cards.map((card, index) => {
-                        const showComingSoon = comingSoonIndexes.includes(index); // ✅ Check index
+                        const showComingSoon = comingSoonIndexes.includes(index);
 
                         return (
                             <div
                                 key={index}
-                                className={`group relative overflow-hidden rounded-2xl p-8 ${card.bgColor} 
-            border border-gray-200 shadow-md hover:shadow-xl transition-all duration-500 ease-out cursor-pointer`}
-                                onClick={() => !showComingSoon && handlecardClick(card)} // ❌ block click if coming soon
+                                className={`relative backdrop-blur-xl bg-white/10 border border-white/20 shadow-lg rounded-3xl p-6 overflow-hidden group transition-all duration-300 ${showComingSoon ? 'cursor-not-allowed' : 'cursor-pointer hover:-translate-y-2'
+                                    }`}
+                                onClick={() => !showComingSoon && handlecardClick(card)}
                             >
                                 {/* Coming Soon Overlay */}
                                 {showComingSoon && (
-                                    <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
-                                        <p className="text-2xl font-bold text-white">Coming Soon</p>
+                                    <div className="absolute inset-0 bg-black/80 z-20 flex items-center justify-center text-white font-bold text-xl backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        Coming Soon
                                     </div>
                                 )}
 
-                                <div className="group relative overflow-hidden rounded-xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl">
-                                    <div className={`${card.bgColor} absolute inset-0 opacity-50 transition-opacity duration-300 group-hover:opacity-75`} />
-                                    <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-                                        <div className={`p-3 rounded-full ${card.bgColor} group-hover:scale-110 transition-transform duration-300`}>
-                                            {card.icon}
-                                        </div>
-                                        <h3 className="text-xl font-semibold text-gray-800">{card.title}</h3>
-                                        <p className="text-gray-600 text-sm">{card.description}</p>
+                                {/* Icon with glow */}
+                                <div className="mb-4 flex items-center justify-center">
+                                    <div className="bg-gradient-to-br from-purple-500 to-blue-500 p-4 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <div className="text-white text-2xl">{card.icon}</div>
                                     </div>
-
-                                    {/* Optional Duplicate Overlay (inner) */}
-                                    {showComingSoon && (
-                                        <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <span className="text-white text-xl font-bold">Coming Soon</span>
-                                        </div>
-                                    )}
                                 </div>
+
+                                {/* Title & Description */}
+                                <h3 className="text-lg font-semibold text-white text-center mb-2">{card.title}</h3>
+                                <p className="text-gray-300 text-sm text-center">{card.description}</p>
+
+                                {/* Border Glow on Hover */}
+                                <div className="absolute inset-0 border border-purple-500 rounded-3xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none"></div>
                             </div>
                         );
                     })}
                 </div>
             </div>
         </section>
+
     );
 };
 
