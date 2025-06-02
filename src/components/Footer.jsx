@@ -1,7 +1,8 @@
 import React from 'react';
 import { FaLinkedin, FaYoutube, FaTwitter, FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import { TbBrandOpenai } from "react-icons/tb";
-import company from "../assets/Logo.png";
+// import company from "../assets/Logo.png";
+import gif from '../assets/gif.gif'
 import { FaSquareInstagram } from "react-icons/fa6";
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -30,12 +31,6 @@ const socialLinks = [
         label: 'YouTube',
         color: 'hover:text-red-500 hover:bg-red-500/10'
     },
-    // {
-    //     icon: <FaTwitter size={20} />,
-    //     path: '/',
-    //     label: 'Twitter',
-    //     color: 'hover:text-sky-500 hover:bg-sky-500/10'
-    // },
 
 ];
 
@@ -51,7 +46,7 @@ const Footer = () => {
                         <div className="flex items-center group cursor-pointer">
                             <Link to={'/'}>
                                 <img
-                                    src={company}
+                                    src={gif}
                                     alt='Logo'
                                     className="text-4xl transition-all duration-300 group-hover:scale-105"
 

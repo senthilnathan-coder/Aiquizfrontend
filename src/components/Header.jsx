@@ -8,7 +8,8 @@ import {
   FaTachometerAlt,
   FaSignInAlt,
 } from 'react-icons/fa';
-import company from '../assets/Logo.png';
+// import company from '../assets/Logo.png';
+import gif from '../assets/gif.gif'
 import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
@@ -21,7 +22,7 @@ const Header = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
-  const countryOptions  = [
+  const countryOptions = [
     { value: 'en', label: '🇺🇸 English', region: 'Global' },
     { value: 'ta', label: '🇮🇳 Tamil', region: 'Asia' },
     { value: 'hi', label: '🇮🇳 Hindi', region: 'Asia' },
@@ -156,12 +157,21 @@ const Header = () => {
 
   return (
     <header className="bg-gradient-to-r from-gray-900 to-gray-800 px-4 sm:px-6 py-4 fixed w-full top-0 z-50">
-      <div className="max-w-7xl mx-auto flex justify-between items-center backdrop-blur-lg bg-white/10 rounded">
+      <div className="w-full mx-auto flex justify-between items-center backdrop-blur-lg bg-white/10 rounded">
         <div
           className="flex items-center cursor-pointer"
           onClick={() => navigate('/')}
         >
-          <img src={company} alt="Logo" className="w-32 h-auto" />
+          {/* <img src={company} alt="Logo" className="w-32 h-auto" /> */}
+          {/* <video
+            autoPlay
+            muted
+            loop
+            className="w-32 h-auto "
+          >
+            <source src={gif} type="video/mp4" />
+          </video> */}
+          <img src={gif} alt="gif" className='w-40 h-[10vh]' />
         </div>
 
         <div className="flex items-center gap-6 justify-center px-4">

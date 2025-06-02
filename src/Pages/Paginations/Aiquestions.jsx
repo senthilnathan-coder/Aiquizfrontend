@@ -1,459 +1,3 @@
-// import React, { useState, useEffect, useCallback } from 'react';
-// import { FaRobot, FaSpinner, FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaLink, FaWikipediaW, FaImage, FaHeadphones, FaVideo } from 'react-icons/fa';
-// import { MdSettings } from 'react-icons/md';
-// import { ToastContainer, toast } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
-
-// import { useAuth } from '../../context/AuthContext'; // Ensure this path is correct
-// import axios from 'axios';
-
-// const Aiquestions = () => {
-//   const [formData, setFormData] = useState({
-//     topic: '',
-//     count: 10, // Corresponds to 'number_questions' in backend
-//     difficulty: 'medium',
-//     questionType: 'mcq',
-//     timeLimit: 60, // Frontend-only for timer (in seconds)
-//     url: '',
-//     wikipediaTitle: '',
-//   });
-
-//   // State for selected files
-//   const [selectedImage, setSelectedImage] = useState(null);
-//   const [selectedAudio, setSelectedAudio] = useState(null);
-//   const [selectedVideo, setSelectedVideo] = useState(null);
-//   const [selectedPdf, setSelectedPdf] = useState(null);
-//   const [selectedWord, setSelectedWord] = useState(null);
-//   const [selectedExcel, setSelectedExcel] = useState(null);
-//   const [selectedPpt, setSelectedPpt] = useState(null);
-
-//   const [isSaving, setIsSaving] = useState(false); // To prevent multiple submissions
-//   const [questions, setQuestions] = useState([]);
-//   const [mainTopic, setMainTopic] = useState(''); // To store the main topic from the backend
-//   const [showQuestions, setShowQuestions] = useState(false);
-//   const [isGenerating, setIsGenerating] = useState(false);
-//   const [selectedAnswers, setSelectedAnswers] = useState({}); // Stores answers by question index: {0: "Option A", 1: "Option B"}
-//   const [showResults, setShowResults] = useState(false);
-//   const [score, setScore] = useState(0); // Raw score (number of correct answers)
-//   const [timeLeft, setTimeLeft] = useState(formData.timeLimit);
-//   const [timerActive, setTimerActive] = useState(false);
-
-//   // New states for saving functionality and notes modal
-//   const [showSaveModal, setShowSaveModal] = useState(false);
-//   const [saveNotes, setSaveNotes] = useState('');
-//   const [savedQuizzes, setSavedQuizzes] = useState([]); // Placeholder for displaying saved quizzes
-//   const [currentQuizAttemptId, setCurrentQuizAttemptId] = useState(null); // To store the ID of the current quiz attempt for notes saving
-
-//   // Auth context for user ID and token
-//   const { user, token } = useAuth();
-//   const userId = user?._id;
-
-//   // --- Quiz Submission Function (Modified) ---
-//   const handleSubmit = useCallback(async () => {
-//     setTimerActive(false); // Stop the timer immediately upon submission
-
-//     if (questions.length === 0) {
-//       toast.info("No questions to submit or save.");
-//       setShowResults(true); // Still show results section, but with 0 score
-//       setScore(0);
-//       return;
-//     }
-
-//     let correctCount = 0;
-//     questions.forEach((question, index) => {
-//       // Ensure question.answer exists and is compared correctly
-//       if (selectedAnswers[index] && question.answer && selectedAnswers[index] === question.answer) {
-//         correctCount++;
-//       }
-//     });
-
-//     const finalScorePercentage = (correctCount / questions.length) * 100;
-//     setScore(finalScorePercentage); // Update the score state with percentage
-//     setShowResults(true); // Display results to the user
-
-//     if (finalScorePercentage >= 80) {
-//       toast.success(`Great job! Score: ${finalScorePercentage.toFixed(1)}%`);
-//     } else if (finalScorePercentage >= 50) {
-//       toast.info(`Good attempt! Score: ${finalScorePercentage.toFixed(1)}%`);
-//     } else {
-//       toast.warning(`Keep practicing! Score: ${finalScorePercentage.toFixed(1)}%`);
-//     }
-
-//     if (!userId) {
-//       toast.error('User not logged in. Quiz results will not be saved.');
-//       return;
-//     }
-
-//     if (isSaving) {
-//       return;
-//     }
-
-//     try {
-//       setIsSaving(true); // Set saving status to true
-
-//       const userAnswersDetailed = questions.map((q, index) => ({
-//         question_id: q._id || `client_gen_${index}`, // Fallback if _id is not present
-//         selected_answer: selectedAnswers[index] || null,
-//         is_correct: selectedAnswers[index] === q.answer, // Add for backend validation/storage
-//       }));
-
-//       const usedContentTypes = [];
-//       if (formData.topic.trim()) usedContentTypes.push('text');
-//       if (selectedImage) usedContentTypes.push('image');
-//       if (selectedAudio) usedContentTypes.push('audio');
-//       if (selectedVideo) usedContentTypes.push('video');
-//       if (selectedPdf) usedContentTypes.push('pdf');
-//       if (selectedWord) usedContentTypes.push('word');
-//       if (selectedExcel) usedContentTypes.push('excel');
-//       if (selectedPpt) usedContentTypes.push('ppt');
-//       if (formData.url?.trim()) usedContentTypes.push('url');
-//       if (formData.wikipediaTitle?.trim()) usedContentTypes.push('wikipedia');
-
-//       let quizContentTopic = mainTopic || formData.topic.trim();
-//       if (!quizContentTopic && formData.url?.trim()) quizContentTopic = formData.url.trim();
-//       if (!quizContentTopic && formData.wikipediaTitle?.trim()) quizContentTopic = formData.wikipediaTitle.trim();
-//       if (!quizContentTopic) quizContentTopic = "AI Generated Quiz"; // Fallback if no specific content type provides a clear topic
-
-//       const quizAttemptData = {
-//         user: userId,
-//         questions: questions, // Sending the full questions array as returned by the backend
-//         user_answers: userAnswersDetailed, // Detailed array of user's selected answers
-//         score: finalScorePercentage, // Percentage score
-//         total_questions: questions.length,
-//         difficulty: formData.difficulty,
-//         question_type: formData.questionType,
-//         topics: mainTopic ? [mainTopic] : [],
-//         content_types: usedContentTypes,
-//         time_taken: formData.timeLimit - timeLeft,
-//         submitted: true, // Crucial for backend to know this is a submission attempt
-//         content: quizContentTopic, // Used 'content' based on your previous logs
-//         // If the new endpoint still relies on the currentQuizAttemptId to link this submission
-//         // to a previously generated quiz instance, you might need to include it here too.
-//         // For example: current_attempt_id: currentQuizAttemptId,
-//       };
-
-//       console.log("Sending quiz attempt data for submission (POST):", quizAttemptData);
-
-//       // CHANGED: Use POST request to the new submission API
-//       const response = await axios.post(
-//         `http://127.0.0.1:8000/user/submitquiz/${userId}/`, // New endpoint
-//         quizAttemptData,
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//             'Content-Type': 'application/json',
-//           }
-//         }
-//       );
-
-//       console.log('Quiz results submitted and saved:', response.data);
-//       toast.success('Quiz results submitted successfully!');
-
-//       // IMPORTANT: If the backend returns a new attempt ID after submission,
-//       // or confirms the `currentQuizAttemptId` was updated/finalized, handle it.
-//       // For example, if the backend sends back a `new_attempt_id` or similar:
-//       if (response.data.quiz_id) { // Assuming backend returns `quiz_id` upon successful submission
-//         setCurrentQuizAttemptId(response.data.quiz_id);
-//       } else {
-//         console.warn("Backend did not return a quiz_id for the submitted attempt.");
-//       }
-
-//     } catch (err) {
-//       const errorMsg =
-//         err.response?.data?.error || err.message || 'Failed to submit quiz results.';
-//       toast.error('Error submitting quiz: ' + errorMsg);
-//       console.error("Submission error:", err.response?.data || err);
-//     } finally {
-//       setIsSaving(false);
-//     }
-//   }, [userId, questions, selectedAnswers, formData.difficulty, formData.questionType, mainTopic, formData.timeLimit, timeLeft, isSaving, token, selectedImage, selectedAudio, selectedVideo, selectedPdf, selectedWord, selectedExcel, selectedPpt, formData.topic, formData.url, formData.wikipediaTitle]);
-
-//   // --- handleSaveQuiz Function (for saving notes/specific quiz instance) ---
-//   const handleSaveQuiz = useCallback(async (notes) => { // Wrapped in useCallback
-//     if (!user || !token || !currentQuizAttemptId) { // Check for currentQuizAttemptId
-//       toast.error("Quiz attempt not found. Please submit the quiz first or generate a new one.");
-//       console.error("Missing user, token, or quiz attempt ID for saving notes.");
-//       return;
-//     }
-
-//     // Determine the primary content for saving.
-//     // Prioritize the mainTopic identified by the backend, then the initial topic input, then URL, then Wikipedia, etc.
-//     let primaryContent = mainTopic || formData.topic.trim();
-//     if (!primaryContent && formData.url?.trim()) primaryContent = formData.url.trim();
-//     if (!primaryContent && formData.wikipediaTitle?.trim()) primaryContent = formData.wikipediaTitle.trim();
-//     // Fallback if no specific content is identified (e.g., if generated from a file without a clear topic)
-//     if (!primaryContent) primaryContent = "AI Generated Quiz";
-
-//     // Collect content types that were used for generation
-//     const usedContentTypes = [];
-//     if (formData.topic.trim()) usedContentTypes.push('text');
-//     if (selectedImage) usedContentTypes.push('image');
-//     if (selectedAudio) usedContentTypes.push('audio');
-//     if (selectedVideo) usedContentTypes.push('video');
-//     if (selectedPdf) usedContentTypes.push('pdf');
-//     if (selectedWord) usedContentTypes.push('word');
-//     if (selectedExcel) usedContentTypes.push('excel');
-//     if (selectedPpt) usedContentTypes.push('ppt');
-//     if (formData.url?.trim()) usedContentTypes.push('url');
-//     if (formData.wikipediaTitle?.trim()) usedContentTypes.push('wikipedia');
-
-//     const quizSavePayload = {
-//       user: userId,
-//       // The 'content' field that the backend is looking for, now guaranteed to be present
-//       content: primaryContent,
-//       // Include quiz details and results for saving this specific attempt
-//       score: score, // The final calculated score percentage
-//       questions: questions, // The generated questions
-//       user_answers: questions.map((q, index) => ({ // Include user's answers for review
-//         question_id: q._id || `client_gen_${index}`,
-//         selected_answer: selectedAnswers[index] || null,
-//         is_correct: selectedAnswers[index] === q.answer, // Include correctness for notes view
-//       })),
-//       difficulty: formData.difficulty,
-//       question_type: formData.questionType,
-//       topics: mainTopic ? [mainTopic] : [],
-//       content_types: usedContentTypes,
-//       time_taken: formData.timeLimit - timeLeft,
-//       notes: notes, // User's custom notes, using the 'notes' parameter
-//       submitted: true, // Indicate it's a submitted attempt
-//     };
-
-//     console.log("Saving quiz with notes - Payload:", quizSavePayload);
-//     console.log("Saving quiz with notes - Endpoint:", `http://localhost:8000/quiz/attempts/${currentQuizAttemptId}/`);
-
-//     try {
-//       // Assuming your backend has a separate endpoint for updating an existing quiz attempt with notes
-//       // This usually involves a PATCH or PUT request to a specific attempt ID.
-//       const response = await axios.patch( // Use PATCH for partial updates
-//         `http://localhost:8000/quiz/attempts/${currentQuizAttemptId}/`, // Example: Update specific attempt
-//         quizSavePayload,
-//         {
-//           headers: {
-//             "Content-Type": "application/json",
-//             Authorization: `Bearer ${token}`,
-//           },
-//         }
-//       );
-
-//       console.log("Quiz notes saved successfully:", response.data);
-//       toast.success("Quiz notes saved successfully!");
-//       setShowSaveModal(false);
-//       setSaveNotes("");
-
-//       // Add to saved quizzes list (if you have one)
-//       setSavedQuizzes((prev) => [
-//         ...prev,
-//         {
-//           id: response.data.quiz_id || Date.now(), // Backend should return a quiz_id
-//           score: score,
-//           date: new Date().toISOString(),
-//           notes: notes, // Use the passed 'notes'
-//           topic: primaryContent, // Store the topic for display
-//         },
-//       ]);
-//     } catch (err) {
-//       const errorMsg = err.response?.data?.error || err.message || "Failed to save quiz notes";
-//       toast.error("Save error: " + errorMsg);
-//       console.error("Save error during notes saving:", err.response?.data || err);
-//     } finally {
-//       setIsSaving(false);
-//     }
-//   }, [user, token, currentQuizAttemptId, userId, mainTopic, formData.topic, formData.url, formData.wikipediaTitle, selectedImage, selectedAudio, selectedVideo, selectedPdf, selectedWord, selectedExcel, selectedPpt, score, questions, selectedAnswers, formData.difficulty, formData.questionType, formData.timeLimit, timeLeft]); // Added dependencies for useCallback
-
-//   // --- Timer Effect ---
-//   useEffect(() => {
-//     let timer;
-//     if (timerActive && timeLeft > 0) {
-//       timer = setInterval(() => {
-//         setTimeLeft(prev => prev - 1);
-//       }, 1000);
-//     } else if (timeLeft === 0 && showQuestions && !showResults) {
-//       toast.warning("Time's up! Submitting quiz automatically...");
-//       handleSubmit();
-//     }
-//     return () => clearInterval(timer);
-//   }, [timerActive, timeLeft, showQuestions, showResults, handleSubmit]);
-
-//   // --- Utility Functions ---
-//   const formatTime = (seconds) => {
-//     const minutes = Math.floor(seconds / 60);
-//     const remainingSeconds = seconds % 60;
-//     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-//   };
-
-//   const validateFile = (file, type) => {
-//     const maxSize = 10 * 1024 * 1024; // 10MB limit
-//     if (!file) return false;
-//     if (file.size > maxSize) {
-//       toast.error(`${type} file size should be less than 10MB`);
-//       return false;
-//     }
-//     return true;
-//   };
-
-//   const handleFileUpload = (file, type, setterFunction) => {
-//     if (file) {
-//       if (validateFile(file, type)) {
-//         setterFunction(file);
-//         toast.success(`${type} file selected successfully`);
-//       } else {
-//         setterFunction(null);
-//       }
-//     } else {
-//       setterFunction(null);
-//     }
-//   };
-
-//   // --- FileUploadCard Component (Purely for rendering UI) ---
-//   const FileUploadCard = ({ type, icon: Icon, accept, selected, setSelected }) => (
-//     <div className="relative group">
-//       <input
-//         type="file"
-//         accept={accept}
-//         onChange={(e) => handleFileUpload(e.target.files[0], type, setSelected)}
-//         className="hidden"
-//         id={`${type}-upload`}
-//       />
-//       <label
-//         htmlFor={`${type}-upload`}
-//         className="flex flex-col items-center justify-center p-4 bg-white/5 border border-purple-500/30 rounded-xl
-//           text-purple-200 cursor-pointer hover:bg-white/10 transition-all text-center h-24"
-//       >
-//         <Icon className="text-2xl mb-1" />
-//         <span>{selected ? `✓ ${type} Selected` : `+ Add ${type}`}</span>
-//       </label>
-//     </div>
-//   );
-
-//   // --- Answer Selection ---
-//   const handleAnswerSelect = (questionIndex, answer) => {
-//     if (!showResults && timerActive) {
-//       setSelectedAnswers(prev => ({
-//         ...prev,
-//         [questionIndex]: answer
-//       }));
-//     }
-//   };
-
-//   // --- Quiz Generation ---
-//   const handleGenerate = async () => {
-//     if (!userId) {
-//       toast.error('Please log in to generate quizzes.');
-//       return;
-//     }
-
-//     const hasContent = Boolean(
-//       formData.topic.trim() ||
-//       selectedImage ||
-//       selectedAudio ||
-//       selectedVideo ||
-//       selectedPdf ||
-//       selectedWord ||
-//       selectedExcel ||
-//       selectedPpt ||
-//       formData.url?.trim() ||
-//       formData.wikipediaTitle?.trim()
-//     );
-
-//     if (!hasContent) {
-//       toast.error('Please provide at least one type of content (text, file, or URL)');
-//       return;
-//     }
-
-//     const formDataToSend = new FormData();
-
-//     // Append text content
-//     if (formData.topic.trim()) {
-//       formDataToSend.append('content', formData.topic.trim());
-//     }
-//     if (formData.url?.trim()) {
-//       formDataToSend.append('url', formData.url.trim());
-//     }
-//     if (formData.wikipediaTitle?.trim()) {
-//       formDataToSend.append('wikipedia_title', formData.wikipediaTitle.trim());
-//     }
-
-//     // Append files - IMPORTANT: Use backend's expected key names (no '_file' suffix)
-//     if (selectedImage) formDataToSend.append('image', selectedImage);
-//     if (selectedAudio) formDataToSend.append('audio', selectedAudio);
-//     if (selectedVideo) formDataToSend.append('video', selectedVideo);
-//     if (selectedPdf) formDataToSend.append('pdf', selectedPdf);
-//     if (selectedWord) formDataToSend.append('word', selectedWord);
-//     if (selectedExcel) formDataToSend.append('excel', selectedExcel);
-//     if (selectedPpt) formDataToSend.append('ppt', selectedPpt);
-
-//     // Append quiz settings
-//     formDataToSend.append('difficulty', formData.difficulty);
-//     formDataToSend.append('question_type', formData.questionType);
-//     formDataToSend.append('number_questions', formData.count.toString()); // Corrected to 'number_questions'
-
-//     setIsGenerating(true);
-//     toast.info('Generating questions... This may take a few seconds.');
-
-//     try {
-//       // Assuming your generation endpoint is `http://localhost:8000/quiz/<userId>/`
-//       const response = await axios.post(`http://localhost:8000/quiz/${userId}/`, formDataToSend, {
-//         headers: {
-//           'Content-Type': 'multipart/form-data', // Essential for FormData for generation
-//           Authorization: `Bearer ${token}`, // Include token for generation
-//         },
-//       });
-
-//       const data = response.data;
-
-//       // Validate the structure of the response
-//       if (!data || !Array.isArray(data.questions) || data.questions.length === 0) {
-//         throw new Error(data.message || 'No questions were generated. Please try different content or settings.');
-//       }
-
-//       setQuestions(data.questions);
-//       setMainTopic(data.topics || 'General Quiz'); // Capture the main topic from backend
-//       setShowQuestions(true);
-//       setSelectedAnswers({}); // Clear answers for new quiz
-//       setShowResults(false); // Hide results for new quiz
-//       setTimeLeft(formData.timeLimit); // Reset timer for new quiz
-//       setTimerActive(true); // Start timer
-//       toast.success('Questions generated successfully! Good luck!');
-
-//       // Set the currentQuizAttemptId from the generation response
-//       if (data.quiz_id) { // Assuming your backend returns a quiz_id when generating
-//         setCurrentQuizAttemptId(data.quiz_id);
-//       } else {
-//         console.warn("Backend did not return a quiz_id during quiz generation. Notes saving might not work.");
-//       }
-
-//       // Clear file inputs and related form data after successful generation
-//       setSelectedImage(null);
-//       setSelectedAudio(null);
-//       setSelectedVideo(null);
-//       setSelectedPdf(null);
-//       setSelectedWord(null);
-//       setSelectedExcel(null);
-//       setSelectedPpt(null);
-//       // Decide if you want to clear topic, url, wikipediaTitle or keep them
-//       setFormData(prev => ({
-//         ...prev,
-//         topic: '', // Clear topic
-//         url: '',    // Clear URL
-//         wikipediaTitle: '', // Clear Wikipedia title
-//       }));
-
-//     } catch (error) {
-//       console.error('Generation error details:', error.response?.data || error.message || error);
-//       const errorMessage = error.response?.data?.error || error.message || 'Failed to generate questions. Please check your server connection and input.';
-//       toast.error(errorMessage);
-//     } finally {
-//       setIsGenerating(false);
-//     }
-//   };
-
-
-
-
-
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaRobot, FaSpinner, FaFilePdf, FaFileWord, FaFileExcel, FaFilePowerpoint, FaLink, FaWikipediaW, FaImage, FaHeadphones, FaVideo } from 'react-icons/fa';
 import { MdSettings } from 'react-icons/md';
@@ -563,6 +107,8 @@ const Aiquestions = () => {
       if (formData.wikipediaTitle?.trim()) usedContentTypes.push('wikipedia');
 
       // Determine the primary content/topic for the initial submission.
+      // This is often the topic the quiz was *generated* from.
+      // Your backend might use a field like 'content' or 'topic' for this.
       let quizContentTopic = mainTopic || formData.topic.trim();
       if (!quizContentTopic && formData.url?.trim()) quizContentTopic = formData.url.trim();
       if (!quizContentTopic && formData.wikipediaTitle?.trim()) quizContentTopic = formData.wikipediaTitle.trim();
@@ -581,14 +127,17 @@ const Aiquestions = () => {
         time_taken: formData.timeLimit - timeLeft, // Calculate actual time taken
         submitted: true, // Crucial for backend to know this is a submission attempt
         content: quizContentTopic, // Include 'content' here if your backend expects it for the overall quiz topic.
-        // The `notes` field has been intentionally removed from here.
-        // It should only be added/updated via `handleSaveQuiz`.
+        // Based on your initial log, it was present, so keep it.
+        // --------------------------------------------------------------------------
+        // REMOVE THE 'NOTES' FIELD FROM HERE. It should only be added via handleSaveQuiz.
+        // notes: "good experences", // <--- THIS LINE MUST BE REMOVED
+        // --------------------------------------------------------------------------
       };
 
       console.log("Sending quiz attempt data for submission:", quizAttemptData);
 
       const response = await axios.post(
-        `http://localhost:8000/quiz/${userId}/`, // Assuming this endpoint handles new quiz attempt submissions
+        `http://localhost:8000/quiz/${userId}/`,
         quizAttemptData,
         {
           headers: {
@@ -602,10 +151,13 @@ const Aiquestions = () => {
       toast.success('Quiz results saved successfully!');
       // Store the quiz attempt ID received from the backend if available
       // THIS IS CRUCIAL FOR handleSaveQuiz TO WORK LATER
-      if (response.data.quiz_id) { // Assuming your backend returns a 'quiz_id'
+      if (response.data.quiz_id) {
         setCurrentQuizAttemptId(response.data.quiz_id);
       } else {
-        console.warn("Backend did not return a quiz_id for the submitted attempt. Notes cannot be saved later.");
+        console.warn("Backend did not return a quiz_id for the submitted attempt.");
+        // You might need a fallback if quiz_id isn't always returned immediately
+        // For example, if the backend uses the user ID and timestamp to identify.
+        // However, a unique quiz_id is highly recommended.
       }
 
     } catch (err) {
@@ -613,32 +165,28 @@ const Aiquestions = () => {
         err.response?.data?.error || err.message || 'Failed to save quiz results.';
       toast.error('Error saving quiz: ' + errorMsg);
       console.error("Save error during submission:", err.response?.data || err);
+      // Log the full response data for more specific backend errors
+      // console.error("Full error response data:", err.response?.data);
+      // console.error("Error status:", err.response?.status);
     } finally {
       setIsSaving(false);
     }
   }, [userId, questions, selectedAnswers, formData.difficulty, formData.questionType, mainTopic, formData.timeLimit, timeLeft, isSaving, token, selectedImage, selectedAudio, selectedVideo, selectedPdf, selectedWord, selectedExcel, selectedPpt, formData.topic, formData.url, formData.wikipediaTitle]); // Dependencies for useCallback
-
-  // --- handleSaveQuiz Function (for saving notes/specific quiz instance) ---
-  // This function is intended to *update* an existing quiz attempt with notes.
- 
-  const handleSaveQuiz = async (notes) => {
-    // This check should already be robust if authLoading is handled upstream
-    if (!user || !token || !currentQuizAttemptId) {
-      toast.error("Quiz attempt not found. Please submit the quiz first or generate a new one.");
-      console.error("Missing user, token, or quiz attempt ID for saving notes.");
-      return;
-    }
-    // ... rest of your save logic
-  
-
-
-    setIsSaving(true); // Set saving status to true for notes saving
+  // --- NEW handleSaveQuiz Function (for saving notes/specific quiz instance) ---
+  const handleSaveQuiz = async (notes) => { // Assuming 'notes' is passed here
+    // if (!user || !token || !currentQuizAttemptId) { // Check for currentQuizAttemptId
+    //   toast.error("Quiz attempt not found. Please submit the quiz first or generate a new one.");
+    //   console.error("Missing user, token, or quiz attempt ID for saving notes.");
+    //   return;
+    // }
 
     // Determine the primary content for saving.
+    // Prioritize the mainTopic identified by the backend, then the initial topic input, then URL, then Wikipedia, etc.
     let primaryContent = mainTopic || formData.topic.trim();
     if (!primaryContent && formData.url?.trim()) primaryContent = formData.url.trim();
     if (!primaryContent && formData.wikipediaTitle?.trim()) primaryContent = formData.wikipediaTitle.trim();
-    if (!primaryContent) primaryContent = "AI Generated Quiz"; // Fallback if no specific content is identified
+    // Fallback if no specific content is identified (e.g., if generated from a file without a clear topic)
+    if (!primaryContent) primaryContent = "AI Generated Quiz";
 
     // Collect content types that were used for generation
     const usedContentTypes = [];
@@ -654,26 +202,33 @@ const Aiquestions = () => {
     if (formData.wikipediaTitle?.trim()) usedContentTypes.push('wikipedia');
 
     const quizSavePayload = {
-      // No need to send `user` or `questions` etc., if this is purely for updating notes
-      // If your backend expects a full object on PATCH, you'll need to include them.
-      // Assuming a minimal update:
-      notes: notes, // Only sending the notes field
-      // If your backend expects other fields for a PATCH/PUT, include them here:
-      // content: primaryContent,
-      // score: score,
-      // time_taken: formData.timeLimit - timeLeft,
-      // submitted: true,
-      // ... other fields that might be updated or are required by your PATCH endpoint
+      user: userId,
+      // The 'content' field that the backend is looking for, now guaranteed to be present
+      content: primaryContent,
+      // Include quiz details and results for saving this specific attempt
+      score: score, // The final calculated score percentage
+      questions: questions, // The generated questions
+      user_answers: questions.map((q, index) => ({ // Include user's answers for review
+        question_id: q._id || `client_gen_${index}`,
+        selected_answer: selectedAnswers[index] || null,
+      })),
+      difficulty: formData.difficulty,
+      question_type: formData.questionType,
+      topics: mainTopic ? [mainTopic] : [],
+      content_types: usedContentTypes,
+      time_taken: formData.timeLimit - timeLeft,
+      notes: notes, // User's custom notes, using the 'notes' parameter
+      submitted: true, // Indicate it's a submitted attempt
     };
 
     console.log("Saving quiz with notes - Payload:", quizSavePayload);
-    // The endpoint should be specific to updating an existing quiz attempt by its ID
-    console.log("Saving quiz with notes - Endpoint:", `http://localhost:8000/quiz/attempts/${currentQuizAttemptId}/`);
+    console.log("Saving quiz with notes - Endpoint:", `http://localhost:8000/quiz/attempts/${currentQuizAttemptId}/`); // Adjusted endpoint for updating an attempt
 
     try {
-      // Use PATCH for partial updates (e.g., just adding notes)
-      const response = await axios.patch(
-        `http://localhost:8000/quiz/attempts/${currentQuizAttemptId}/`, // Use the specific attempt ID
+      // Assuming your backend has a separate endpoint for updating an existing quiz attempt with notes
+      // This usually involves a PATCH or PUT request to a specific attempt ID.
+      const response = await axios.patch( // Use PATCH for partial updates
+        `http://localhost:8000/quiz/attempts/${currentQuizAttemptId}/`, // Example: Update specific attempt
         quizSavePayload,
         {
           headers: {
@@ -688,14 +243,17 @@ const Aiquestions = () => {
       setShowSaveModal(false);
       setSaveNotes("");
 
-      // You might want to update the `savedQuizzes` state to reflect the new notes
-      // for the specific quiz attempt.
-      setSavedQuizzes((prev) =>
-        prev.map((quiz) =>
-          quiz.id === currentQuizAttemptId ? { ...quiz, notes: notes } : quiz
-        )
-      );
-
+      // Add to saved quizzes list (if you have one)
+      setSavedQuizzes((prev) => [
+        ...prev,
+        {
+          id: response.data.quiz_id || Date.now(), // Backend should return a quiz_id
+          score: score,
+          date: new Date().toISOString(),
+          notes: notes, // Use the passed 'notes'
+          topic: primaryContent, // Store the topic for display
+        },
+      ]);
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.message || "Failed to save quiz notes";
       toast.error("Save error: " + errorMsg);

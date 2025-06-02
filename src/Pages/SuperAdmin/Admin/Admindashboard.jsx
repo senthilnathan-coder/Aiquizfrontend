@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   const [moderationType, setModerationType] = useState('all')
 
   return (
-    <div className="space-y-6 p-4 md:p-6 lg:p-10 max-w-[2000px] mx-auto">
+    <div className="space-y-6 p-4 md:p-6 lg:p-10 max-w-[2000px] mx-auto mt-20">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -107,7 +107,7 @@ const AdminDashboard = () => {
       <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h2 className="text-lg font-semibold text-gray-900">User Engagement</h2>
-          <select 
+          <select
             className="text-sm border rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
@@ -161,7 +161,7 @@ const AdminDashboard = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h2 className="text-lg font-semibold text-gray-900">Content Moderation</h2>
           <div className="flex flex-wrap gap-3">
-            <select 
+            <select
               className="text-sm border rounded-lg p-2 bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               value={moderationType}
               onChange={(e) => setModerationType(e.target.value)}

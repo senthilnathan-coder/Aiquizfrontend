@@ -76,7 +76,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-slate-900 to-purple-900 p-3 sm:p-4 md:p-6 ">
+    <div className="min-h-screen bg-gradient-to-r from-slate-900 to-purple-900 p-3 sm:p-4 md:p-6 mt-20">
       <div className="max-w-7xl mx-auto mt-8">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0 ">
@@ -101,7 +101,7 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8"
           initial="hidden"
           animate="visible"
@@ -126,7 +126,7 @@ const Dashboard = () => {
         </motion.div>
 
         {/* New Trend Chart Section */}
-        <motion.div 
+        <motion.div
           className="bg-white/10 backdrop-blur-lg rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -229,7 +229,7 @@ const Dashboard = () => {
         </div>
 
         {/* Action Panels */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6"
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -239,14 +239,14 @@ const Dashboard = () => {
             icon={<FaFileUpload className="text-xl sm:text-2xl" />}
             title="Bulk Upload"
             description="Upload questions via Excel or PDF"
-            action={() => {/* Handle bulk upload */}}
+            action={() => {/* Handle bulk upload */ }}
             gradient="from-purple-500 to-pink-500"
           />
           <ActionPanel
             icon={<FaClock className="text-xl sm:text-2xl" />}
             title="Schedule Quiz"
             description="Set up upcoming quiz releases"
-            action={() => {/* Handle scheduling */}}
+            action={() => {/* Handle scheduling */ }}
             gradient="from-blue-500 to-cyan-500"
           />
         </motion.div>

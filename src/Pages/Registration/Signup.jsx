@@ -4,15 +4,19 @@ import { FaUser, FaEnvelope, FaLock, FaPhone, FaImage, FaEye, FaEyeSlash } from 
 import { useAuth } from '../../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { IoArrowBackCircleOutline } from "react-icons/io5";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
+
 
 const Signup = () => {
   const navigate = useNavigate();
   const { signup } = useAuth();
 
   const [formData, setFormData] = useState({
-    profile: null,
+    // profile: null,
     fullName: '',
-    countryCode: '+91',
     phoneNumber: '',
     email: '',
     password: '',
@@ -22,19 +26,19 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [profilePreview, setProfilePreview] = useState(null);
+  // const [profilePreview, setProfilePreview] = useState(null);
   const [errorOverall, setErrorOverall] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateField = (name, value) => {
     switch (name) {
-      case 'profile':
-        if (!value) return 'Profile image is required';
-        if (value.size > 5 * 1024 * 1024) return 'Image must be less than 5MB';
-        if (!['image/jpeg', 'image/png', 'image/jpg'].includes(value.type)) {
-          return 'Only JPG, JPEG & PNG files are allowed';
-        }
-        return '';
+      // case 'profile':
+      //   if (!value) return 'Profile image is required';
+      //   if (value.size > 5 * 1024 * 1024) return 'Image must be less than 5MB';
+      //   if (!['image/jpeg', 'image/png', 'image/jpg'].includes(value.type)) {
+      //     return 'Only JPG, JPEG & PNG files are allowed';
+      //   }
+      //   return '';
       case 'fullName': {
         const nameValue = value.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ').trim();
         setFormData((prev) => ({ ...prev, [name]: nameValue }));
@@ -43,48 +47,62 @@ const Signup = () => {
         if (nameValue.length > 50) return 'Too long';
         return '';
       }
-      case 'countryCode': {
-        const validCodes = ['+91', '+1', '+44', '+61', '+81', '+971'];
-        if (!value) return 'Country code is required';
-        if (!validCodes.includes(value)) return 'Invalid country code';
-        return '';
-      }
+      // case 'countryCode': {
+      //   const validCodes = ['+91', '+1', '+44', '+61', '+81', '+971'];
+      //   if (!value) return 'Country code is required';
+      //   if (!validCodes.includes(value)) return 'Invalid country code';
+      //   return '';
+      // }
       case 'phoneNumber': {
-        const phoneValue = value.replace(/[^0-9]/g, '');
-        if (phoneValue.length <= 10) {
-          setFormData((prev) => ({ ...prev, [name]: phoneValue }));
-        }
-        if (!phoneValue) return 'Phone number is required';
-        if (!/^[6-9]\d{9}$/.test(phoneValue)) return 'Must be 10 digits and start with 6-9';
+        if (!value) return 'Phone number is required';
+        const digits = value.replace(/\D/g, '');
+        if (digits.length < 10) return 'Phone number is too short';
         return '';
       }
+
       case 'email':
         if (!value) return 'Email is required';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email';
+
+        if (/\s/.test(value)) return 'Email cannot contain spaces';
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        if (!emailRegex.test(value)) return 'Invalid email format';
+
+        const maxLength = 100;
+        if (value.length > maxLength) return `Email must be under ${maxLength} characters`;
+
         return '';
+
+
       case 'password':
         if (!value) return 'Password is required';
-        if (value.length < 8) return 'At least 8 characters';
+        if (value.length < 8) return 'Password must be at least 8 characters long';
+        if (!/[A-Z]/.test(value)) return 'Password must contain at least one uppercase letter';
+        if (!/[a-z]/.test(value)) return 'Password must contain at least one lowercase letter';
+        if (!/[0-9]/.test(value)) return 'Password must contain at least one number';
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) return 'Password must contain at least one special character';
         return '';
+
       case 'confirmPassword':
         if (!value) return 'Confirm your password';
-        if (value !== formData.password) return 'Passwords must match';
+        if (value !== formData.password) return "Passwords don't match";
         return '';
+
       default:
         return '';
     }
   };
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
 
-    if (name === 'profile') {
-      const file = files[0];
-      setFormData((prev) => ({ ...prev, profile: file }));
-      setProfilePreview(file ? URL.createObjectURL(file) : null);
-      setErrors((prev) => ({ ...prev, profile: validateField(name, file) }));
-      return;
-    }
+    // if (name === 'profile') {
+    //   const file = files[0];
+    //   setFormData((prev) => ({ ...prev, profile: file }));
+    //   setProfilePreview(file ? URL.createObjectURL(file) : null);
+    //   setErrors((prev) => ({ ...prev, profile: validateField(name, file) }));
+    //   return;
+    // }
 
     let sanitizedValue = value;
 
@@ -118,7 +136,7 @@ const Signup = () => {
     setIsSubmitting(true);
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('profile', formData.profile);
+      // formDataToSend.append('profile', formData.profile);
       formDataToSend.append('full_name', formData.fullName.trim());
       formDataToSend.append('country_code', formData.countryCode);
       formDataToSend.append('phone_number', formData.phoneNumber);
@@ -148,25 +166,26 @@ const Signup = () => {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (profilePreview) URL.revokeObjectURL(profilePreview);
-    };
-  }, [profilePreview]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (profilePreview) URL.revokeObjectURL(profilePreview);
+  //   };
+  // }, [profilePreview]);
 
-  const handleRemoveProfile = () => {
-    setFormData((prev) => ({ ...prev, profile: null }));
-    setProfilePreview(null);
-    setErrors((prev) => ({ ...prev, profile: 'Profile image is required' }));
-  };
+  // const handleRemoveProfile = () => {
+  //   setFormData((prev) => ({ ...prev, profile: null }));
+  //   setProfilePreview(null);
+  //   setErrors((prev) => ({ ...prev, profile: 'Profile image is required' }));
+  // };
 
 
   return (
     <>
       <ToastContainer />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 via-indigo-900 to-blue-900 py-8 px-4">
-        <div className="max-w-md w-full bg-white/10 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/10">
+        <div className="max-w-md w-full bg-gray-800 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-gray-600">
           <div className="text-center mb-8">
+            <Link to={'/login'} className='text-blue-200/70 cursor-pointer hover:text-blue-500'><IoArrowBackCircleOutline size={30} /></Link>
             <h2 className="text-3xl font-bold text-white">Create Account</h2>
             <p className="mt-2 text-blue-200/80">Join us to explore AI-powered learning</p>
           </div>
@@ -179,7 +198,7 @@ const Signup = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {/* Profile Image Section */}
-            <div className="text-center space-y-3">
+            {/* <div className="text-center space-y-3">
               <div className="relative inline-block">
                 <label
                   htmlFor="profile"
@@ -232,7 +251,7 @@ const Signup = () => {
               <p className="text-blue-200/60 text-xs">
                 Supported formats: JPG, JPEG, PNG (max 5MB)
               </p>
-            </div>
+            </div> */}
 
             {/* Full Name - fixed alignment */}
             <div className="relative flex items-center">
@@ -241,42 +260,44 @@ const Signup = () => {
                 type="text"
                 name="fullName"
                 value={formData.fullName}
+                maxLength={100}
                 onChange={handleChange}
                 placeholder="Full Name"
                 className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-blue-500/50"
               />
-              {errors.fullName && <p className="absolute -bottom-6 left-0 text-red-400 text-sm">{errors.fullName}</p>}
+              {errors.fullName && <p className="absolute -bottom-6 right-0 text-red-400 text-sm">{errors.fullName}</p>}
             </div>
 
             {/* Phone - fixed alignment */}
-            <div className="flex space-x-4">
-              <div className="w-1/3 relative flex items-center">
+            <div className="">
+              {/* <div className="w-1/3 relative flex items-center">
                 <FaPhone className="absolute left-3 text-blue-200/60 text-lg rotate-90" />
-                <select
-                  name="countryCode"
-                  value={formData.countryCode}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-2 py-3 bg-white/10 border border-white/20 rounded-xl text-white appearance-none focus:outline-none focus:border-blue-500/50"
-                >
-                  <option className='text-blue-500' value="+91">🇮🇳 +91</option>
-                  <option className='text-blue-500' value="+1">🇺🇸 +1</option>
-                  <option className='text-blue-500' value="+44">🇬🇧 +44</option>
-                  <option className='text-blue-500' value="+61">🇦🇺 +61</option>
-                  <option className='text-blue-500' value="+81">🇯🇵 +81</option>
-                  <option className='text-blue-500' value="+971">🇦🇪 +971</option>
-                </select>
-              </div>
-              <div className="w-2/3 relative flex items-center">
                 <input
-                  type="tel"
-                  maxLength={10}
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="Phone Number"
-                  className="w-full pl-4 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-blue-500/50"
+                  type="text"
+                  name="countryCode"
+                  value="+91"
+                  readOnly
+                  className="w-full pl-10 pr-2 py-3 bg-white/10 border border-white/20 rounded-xl text-white appearance-none cursor-default focus:outline-none"
                 />
-                {errors.phoneNumber && <p className="absolute -bottom-6 left-0 text-red-400 text-sm">{errors.phoneNumber}</p>}
+              </div> */}
+
+              <div className="w-full relative">
+                <PhoneInput
+                  className=""
+                  country={'in'} // default to India
+                  value={formData.phoneNumber}
+                  onChange={(phone) => setFormData((prev) => ({ ...prev, phoneNumber: phone }))}
+                  inputProps={{
+                    name: 'phone',
+                    required: true,
+                    autoFocus: false,
+                  }}
+                  containerClass="w-full"
+                  inputClass="!w-full !bg-white/10 !border !border-white/20 !text-white !pl-14 !py-6 !rounded-r-xl"
+                  buttonClass="!bg-blue-400"
+                  dropdownClass="!text-black !bg-gray-300"
+                />
+                {errors.phoneNumber && <p className="absolute right-0 text-red-400 text-sm">{errors.phoneNumber}</p>}
               </div>
             </div>
 
@@ -291,7 +312,7 @@ const Signup = () => {
                 placeholder="Email Address"
                 className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-blue-500/50"
               />
-              {errors.email && <p className="absolute -bottom-6 left-0 text-red-400 text-sm">{errors.email}</p>}
+              {errors.email && <p className="absolute -bottom-6 right-0 text-red-400 text-sm">{errors.email}</p>}
             </div>
 
             {/* Password - fixed alignment */}
@@ -312,7 +333,7 @@ const Signup = () => {
               >
                 {showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
               </button>
-              {errors.password && <p className="absolute -bottom-6 left-0 text-red-400 text-sm">{errors.password}</p>}
+              {errors.password && <p className="absolute -bottom-6 right-0 text-red-400 text-sm">{errors.password}</p>}
             </div>
 
             {/* Confirm Password - fixed alignment */}
@@ -334,7 +355,7 @@ const Signup = () => {
                 {showConfirmPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
               </button>
               {errors.confirmPassword && (
-                <p className="absolute -bottom-6 left-0 text-red-400 text-sm">{errors.confirmPassword}</p>
+                <p className="absolute -bottom-6 right-0 text-red-400 text-sm">{errors.confirmPassword}</p>
               )}
             </div>
 
@@ -347,10 +368,10 @@ const Signup = () => {
               {isSubmitting ? 'Creating Account...' : 'Sign Up'}
             </button>
 
-            <p className="text-center text-blue-200/80 text-sm">
+            {/* <p className="text-center text-blue-200/80 text-sm">
               Already have an account?{' '}
               <Link to="/login" className="text-blue-400 hover:underline">Login</Link>
-            </p>
+            </p> */}
           </form>
         </div>
       </div>
@@ -359,16 +380,16 @@ const Signup = () => {
 };
 
 // Add handleRemoveProfile inside the component
-const handleRemoveProfile = () => {
-  setFormData(prev => ({ ...prev, profile: null }));
-  setProfilePreview(null);
-  setErrors(prev => ({ ...prev, profile: 'Profile image is required' }));
+// const handleRemoveProfile = () => {
+//   setFormData(prev => ({ ...prev, profile: null }));
+//   setProfilePreview(null);
+//   setErrors(prev => ({ ...prev, profile: 'Profile image is required' }));
 
-  // Reset the file input
-  const fileInput = document.getElementById('profile');
-  if (fileInput) {
-    fileInput.value = '';
-  }
-};
+//   // Reset the file input
+//   const fileInput = document.getElementById('profile');
+//   if (fileInput) {
+//     fileInput.value = '';
+//   }
+// };
 
 export default Signup;

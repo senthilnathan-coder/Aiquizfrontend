@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useGoogleLogin } from '@react-oauth/google';
+import logo from '../../assets/Logo.png'
 
 const Login = () => {
     const navigate = useNavigate();
@@ -120,10 +121,13 @@ const Login = () => {
         <>
             <ToastContainer />
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-950 via-indigo-900 to-blue-900 py-8 px-4">
-                <div className="max-w-md w-full bg-white/10 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/10">
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
-                        <p className="mt-2 text-blue-200/80">Login to your account</p>
+                <div className="max-w-md w-full bg-gray-800 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-gray-600">
+
+                    <div className=" flex flex-col items-center justify-center text-center mb-8">
+
+                        <h2 className="text-3xl font-bold text-white mb-5">Welcome Back</h2>
+                        {/* <p className="mt-2 text-blue-200/80">Login to your account</p> */}
+                        <img src={logo} alt="logo" className='w-60  drop-shadow-lg cursor-pointer' onClick={() => navigate('/')} />
                     </div>
 
                     {errorOverall && (
@@ -144,7 +148,7 @@ const Login = () => {
                                 placeholder="Email Address"
                                 className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-blue-500/50"
                             />
-                            {errors.email && <p className="absolute -bottom-6 left-0 text-red-400 text-sm">{errors.email}</p>}
+                            {errors.email && <p className="absolute -bottom-6 right-0 text-red-400 text-sm">{errors.email}</p>}
                         </div>
 
                         {/* Password */}
@@ -165,13 +169,13 @@ const Login = () => {
                             >
                                 {showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
                             </button>
-                            {errors.password && <p className="absolute -bottom-6 left-0 text-red-400 text-sm">{errors.password}</p>}
+                            {errors.password && <p className="absolute -bottom-6 right-0 text-red-400 text-sm">{errors.password}</p>}
                         </div>
 
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl transition-all duration-300 mt-8 font-medium disabled:opacity-50"
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-xl transition-all duration-300 mt-4 font-medium disabled:opacity-50"
                         >
                             {isSubmitting ? 'Logging in...' : 'Login'}
                         </button>

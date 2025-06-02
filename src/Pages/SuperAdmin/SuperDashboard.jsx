@@ -18,7 +18,7 @@ const SuperDashboard = () => {
   return (
     <>
 
-<div className='x-full flex justify-between'>
+<div className='x-full flex justify-between '>
 
 <div className='w-2/12'>
         <AdminLayout />
